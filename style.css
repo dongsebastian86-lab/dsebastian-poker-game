@@ -1,0 +1,1604 @@
+/* ============== Base ============== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --felt: #0a6b3a;
+  --felt-dark: #085029;
+  --felt-light: #11804a;
+  --gold: #ffd76b;
+  --gold-dark: #c9a233;
+  --bg: #0b1d12;
+  --card-bg: #f8f5ec;
+  --card-red: #c0392b;
+  --card-black: #1a1a1a;
+  --text: #f0e9d6;
+  --text-dim: #c7bfa6;
+  --danger: #e74c3c;
+  --success: #2ecc71;
+  --highlight: #f1c40f;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  background: radial-gradient(ellipse at center, #0e2a18 0%, #050d09 100%);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============== Screens ============== */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ============== Lobby ============== */
+#lobby {
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.lobby-card {
+  background: linear-gradient(180deg, #15291c 0%, #0d1c12 100%);
+  border: 1px solid #1e3a26;
+  border-radius: 18px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.title {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(180deg, #ffe27a 0%, #c9a233 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.subtitle {
+  text-align: center;
+  color: var(--text-dim);
+  margin-bottom: 28px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+.form-row {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-row.hidden { display: none; }
+.form-row > label {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.form-row small { color: var(--text-dim); font-size: 11px; opacity: 0.7; }
+.mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mode-btn {
+  background: #1a2c20;
+  color: var(--text-dim);
+  border: 1px solid #2a4531;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.mode-btn.active {
+  background: linear-gradient(180deg, #1f5a36 0%, #154528 100%);
+  color: var(--gold);
+  border-color: var(--gold-dark);
+  box-shadow: 0 0 0 1px rgba(255,215,107,0.2), 0 4px 14px rgba(0,0,0,0.3);
+}
+.mode-btn:hover:not(.active) { background: #22392b; color: var(--text); }
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.counter-btn {
+  width: 36px;
+  height: 36px;
+  background: #1a2c20;
+  border: 1px solid #2a4531;
+  color: var(--gold);
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.counter-btn:hover { background: #244031; transform: translateY(-1px); }
+.counter-value {
+  flex: 1;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+  background: #0f2018;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #2a4531;
+}
+.primary-btn {
+  width: 100%;
+  background: linear-gradient(180deg, #f5cb4e 0%, #c9a233 100%);
+  color: #1a1410;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 12px;
+  letter-spacing: 0.5px;
+  transition: all 0.15s;
+  box-shadow: 0 4px 0 #8a6e1e, 0 6px 18px rgba(201,162,51,0.4);
+}
+.primary-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #8a6e1e, 0 3px 8px rgba(201,162,51,0.3); }
+.primary-btn:hover { filter: brightness(1.05); }
+
+/* Lobby sliders — used by buy-in and blinds */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.slider-row input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 22px;            /* matches thumb so thumb's natural center aligns with slider's center */
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+}
+.slider-row input[type=range]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--gold) var(--progress, 0%),
+    rgba(201,162,51,0.30) var(--progress, 0%),
+    rgba(201,162,51,0.30) 100%
+  );
+  border-radius: 999px;
+}
+.slider-row input[type=range]::-moz-range-track {
+  height: 8px;
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--gold) var(--progress, 0%),
+    rgba(201,162,51,0.30) var(--progress, 0%),
+    rgba(201,162,51,0.30) 100%
+  );
+  border-radius: 999px;
+}
+.slider-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid var(--gold);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  margin-top: -7px;        /* visually centers a 22px thumb on the 8px track (22-8)/2 */
+}
+.slider-row input[type=range]::-moz-range-thumb {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid var(--gold);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+.slider-value {
+  min-width: 70px;
+  text-align: right;
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* "Back to Casino" button shown only inside each game's lobby (not in
+   the active game table). Subtle, doesn't compete with the primary CTA. */
+.lobby-cancel {
+  width: 100%;
+  margin-top: 6px;
+  background: transparent;
+  border: 1px solid var(--gold-dark);
+  color: var(--gold);
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-align: center;
+  opacity: 0.9;
+  transition: all 0.15s;
+}
+.lobby-cancel:hover {
+  background: rgba(201,162,51,0.12);
+  border-color: var(--gold);
+  color: #ffe27a;
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(255,215,107,0.10), 0 4px 14px rgba(0,0,0,0.3);
+}
+.lobby-cancel:active {
+  transform: translateY(1px);
+}
+.lobby-cancel:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--gold), 0 4px 14px rgba(0,0,0,0.3);
+}
+
+/* ============== Table ============== */
+#table {
+  align-items: stretch;
+  justify-content: flex-start;
+}
+.top-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.4);
+  border-bottom: 1px solid #1e3a26;
+  position: sticky; top: 0; z-index: 10;
+}
+.pot-display {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 700;
+  background: linear-gradient(180deg, #1f5a36 0%, #154528 100%);
+  border: 1px solid var(--gold-dark);
+  border-radius: 999px;
+  padding: 6px 16px;
+  box-shadow: 0 0 14px rgba(255,215,107,0.18);
+}
+.pot-display .label {
+  color: var(--gold-dark);
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+.pot-display span:last-child {
+  color: var(--gold);
+  font-size: 22px;
+  text-shadow: 0 0 12px rgba(255,215,107,0.35);
+  transition: all 0.2s;
+}
+
+/* Numeric pot badge anchored under the chip pile on the felt —
+   keeps the amount visible without making the player glance at the
+   top bar mid-action. Hidden while pot is empty (preflop before any
+   re-raise post-blinds). */
+.pot-pile-label {
+  background: rgba(0,0,0,0.55);
+  border: 1px solid var(--gold-dark);
+  color: var(--gold);
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  min-width: 80px;
+  text-align: center;
+  box-shadow: 0 0 14px rgba(255,215,107,0.20);
+  text-shadow: 0 0 10px rgba(255,215,107,0.30);
+}
+.pot-pile-label.hidden { display: none; }
+.round-display {
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--gold);
+}
+
+/* Poker status bar — shows small blind, big blind, and the current
+   acting player. Sits below the top-bar so it stays visible above the
+   table without crowding the felt. */
+.poker-status-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 8px 16px;
+  background: rgba(0,0,0,0.45);
+  border-bottom: 1px solid #1e3a26;
+}
+.poker-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: linear-gradient(180deg, #1a2e22 0%, #0d1c12 100%);
+  border: 1px solid #2a4531;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  min-width: 110px;
+  justify-content: center;
+}
+.poker-status-pill .pill-label {
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.poker-status-pill .pill-value {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 13px;
+}
+.poker-status-pill.turn-pill {
+  border-color: var(--gold-dark);
+  background: linear-gradient(180deg, #2a1f08 0%, #150d04 100%);
+  box-shadow: 0 0 12px rgba(255,215,107,0.18);
+}
+.poker-status-pill.turn-pill .pill-value {
+  color: #ffe27a;
+  font-size: 14px;
+}
+.ghost-btn {
+  background: transparent;
+  border: 1px solid #2a4531;
+  color: var(--text-dim);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.ghost-btn:hover { background: #1a2c20; color: var(--text); }
+
+.table-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  position: relative;
+}
+.felt {
+  position: relative;
+  width: min(720px, 100%);
+  aspect-ratio: 5 / 3;
+  background:
+    radial-gradient(ellipse at center, var(--felt-light) 0%, var(--felt) 50%, var(--felt-dark) 100%);
+  border-radius: 50% / 35%;
+  border: 14px solid #3b2010;
+  box-shadow:
+    0 0 0 1px #1a0e05,
+    0 30px 60px rgba(0,0,0,0.6),
+    inset 0 0 60px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.felt::before {
+  content: '';
+  position: absolute;
+  inset: 16px;
+  border: 2px dashed rgba(255,215,107,0.25);
+  border-radius: 50% / 35%;
+  pointer-events: none;
+}
+
+/* ============== Community cards ============== */
+.community-row {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  z-index: 2;
+}
+.community-cards {
+  display: flex;
+  gap: 8px;
+  min-height: 88px;
+  align-items: center;
+  justify-content: center;
+}
+.pot-pile {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px;
+}
+.chip-stack {
+  display: flex; align-items: center; justify-content: center;
+  gap: 4px;
+}
+
+/* ============== Seats ============== */
+/* (split into helpers above) */
+.seat {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: auto;
+  transition: transform 0.2s;
+  transform: translate(-50%, -50%);
+}
+.seat.active-turn .seat-frame {
+  box-shadow: 0 0 0 3px var(--gold), 0 0 24px rgba(255,215,107,0.6);
+  transform: scale(1.04);
+}
+.seat.folded .seat-frame { opacity: 0.55; filter: grayscale(0.6); }
+.seat.all-in .seat-frame { border-color: var(--highlight); }
+.seat.winner .seat-frame {
+  box-shadow: 0 0 0 3px var(--success), 0 0 30px rgba(46,204,113,0.7);
+  animation: winnerPulse 1.2s ease-in-out infinite;
+}
+@keyframes winnerPulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--success), 0 0 30px rgba(46,204,113,0.7); }
+  50% { box-shadow: 0 0 0 3px var(--success), 0 0 50px rgba(46,204,113,1); }
+}
+.seat-frame {
+  background: rgba(0,0,0,0.4);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  /* min-width reduced from 130px → 100px so 4-7 seats still fit the
+     narrower 720px felt without overlap. */
+  min-width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+.seat-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--gold);
+  text-align: center;
+  white-space: nowrap;
+}
+.seat-chips {
+  font-size: 12px;
+  color: var(--text);
+  display: flex; gap: 4px; align-items: center;
+}
+.seat-bet {
+  background: var(--gold);
+  color: #1a1410;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 11px;
+  display: none;
+}
+.seat-bet.visible { display: inline-block; }
+.seat-folded-label {
+  background: var(--danger);
+  color: white;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  display: none;
+}
+.seat.folded .seat-folded-label { display: inline-block; }
+.seat-hole {
+  display: flex; gap: 4px;
+  height: 50px;
+}
+.dealer-marker {
+  position: absolute;
+  top: -14px;
+  left: -10px;
+  width: 26px;
+  height: 26px;
+  background: var(--gold);
+  color: #1a1410;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+  border: 2px solid #2a1f10;
+  z-index: 4;
+}
+.seat.dealer .dealer-marker {
+  display: flex;
+}
+
+/* Small / big blind pill markers on each seat frame, mirroring the
+   gold "D" dealer marker. Pills (rather than circles) so the 2-
+   letter labels fit above the dealer row. */
+.sb-marker, .bb-marker {
+  position: absolute;
+  top: -14px;
+  height: 26px;
+  background: var(--gold);
+  color: #1a1410;
+  border-radius: 13px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+  border: 2px solid #2a1f10;
+  z-index: 4;
+}
+.sb-marker { right: -10px; width: 32px; }
+.bb-marker { left: 50%; transform: translateX(-50%); width: 32px; top: -36px; }
+.seat.sb .sb-marker { display: flex; }
+.seat.bb .bb-marker { display: flex; }
+
+/* ============== Cards ============== */
+.card {
+  width: 56px;
+  height: 78px;
+  background: var(--card-bg);
+  border: 1.5px solid #d8d4c2;
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 6px;
+  font-weight: 700;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.35);
+  flex-shrink: 0;
+  user-select: none;
+  transition: transform 0.2s;
+}
+.card.small {
+  width: 40px;
+  height: 56px;
+  font-size: 14px;
+  padding: 3px 4px;
+}
+.card.tiny {
+  width: 32px;
+  height: 44px;
+  font-size: 11px;
+  padding: 2px 3px;
+}
+.card.back {
+  background:
+    repeating-linear-gradient(45deg, #6c1a1a 0, #6c1a1a 6px, #4a0f0f 6px, #4a0f0f 12px);
+  border-color: #2a0808;
+}
+.card.back::after {
+  content: '♠';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.18);
+  font-size: 30px;
+}
+.card.red { color: var(--card-red); }
+.card.black { color: var(--card-black); }
+.card .rank { font-size: 16px; line-height: 1; }
+.card .suit { font-size: 14px; line-height: 1; }
+.card .center-suit {
+  font-size: 30px;
+  line-height: 1;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+.card.small .rank { font-size: 11px; }
+.card.small .suit { font-size: 10px; }
+.card.small .center-suit { font-size: 20px; }
+.card.tiny .rank { font-size: 9px; }
+.card.tiny .suit { font-size: 8px; }
+.card.tiny .center-suit { font-size: 14px; }
+.card .corner {
+  display: flex; flex-direction: column; align-items: center; line-height: 1;
+}
+.card .corner-br {
+  position: absolute;
+  bottom: 4px; right: 6px;
+  transform: rotate(180deg);
+}
+.card.flip-anim {
+  animation: flipIn 0.5s ease-out;
+}
+.card.flip-anim {
+  animation: flipIn 0.5s ease-out;
+}
+@keyframes flipIn {
+  0% { transform: perspective(600px) rotateY(180deg); }
+  100% { transform: perspective(600px) rotateY(0); }
+}
+
+/* Chip */
+.chip {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 3px dashed #8a6e1e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 10px;
+  color: #1a1410;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+.chip.red { background: #d24c4c; border-color: #6b1a1a; color: white; }
+.chip.blue { background: #2e86de; border-color: #1a4974; color: white; }
+.chip.green { background: #27ae60; border-color: #155f32; color: white; }
+.chip.black { background: #2c3e50; border-color: #0a131c; color: white; }
+.chip-stack > .chip:not(:first-child) { margin-left: -10px; }
+
+/* ============== Action panel ============== */
+.action-panel {
+  background: rgba(0,0,0,0.5);
+  border-top: 1px solid #1e3a26;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 16px;
+  align-items: center;
+}
+.action-panel.hidden { display: none; }
+.player-info {
+  display: flex; flex-direction: column;
+}
+.player-info > div:first-child {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 14px;
+}
+.player-info > div:last-child {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.bet-controls {
+  display: flex;
+  gap: 8px;
+}
+.action-btn {
+  flex: 1;
+  padding: 12px 6px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.12s;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.action-btn.fold { background: #4a1b1b; color: #ffd9d9; border: 1px solid #6b2828; }
+.action-btn.check { background: #1b3a4a; color: #d9eeff; border: 1px solid #285a6b; }
+.action-btn.call { background: #1b4a2b; color: #d9ffe3; border: 1px solid #28823f; }
+.action-btn.raise { background: var(--gold); color: #1a1410; border: 1px solid var(--gold-dark); }
+.action-btn:hover { filter: brightness(1.15); }
+.action-btn:active { transform: translateY(1px); }
+.action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+.raise-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.raise-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.raise-row input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 18px;            /* matches thumb so thumb's natural center aligns with slider's center */
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+}
+.raise-row input[type=range]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--gold) var(--progress, 0%),
+    rgba(201,162,51,0.30) var(--progress, 0%),
+    rgba(201,162,51,0.30) 100%
+  );
+  border-radius: 999px;
+}
+.raise-row input[type=range]::-moz-range-track {
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--gold) var(--progress, 0%),
+    rgba(201,162,51,0.30) var(--progress, 0%),
+    rgba(201,162,51,0.30) 100%
+  );
+  border-radius: 999px;
+}
+.raise-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px;
+  margin-top: -6px;        /* visually centers a 18px thumb on the 6px track (18-6)/2 */
+  border-radius: 50%; background: white;
+  border: 2px solid var(--gold-dark);
+  cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.raise-row input[type=range]::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%; background: white;
+  border: 2px solid var(--gold-dark);
+  cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.raise-row span {
+  min-width: 70px; text-align: right;
+  color: var(--gold); font-weight: 700;
+}
+.raise-presets {
+  display: flex; gap: 6px;
+}
+.preset-btn {
+  flex: 1;
+  background: #1a2c20;
+  color: var(--text-dim);
+  border: 1px solid #2a4531;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.preset-btn:hover { background: #22392b; color: var(--gold); }
+.preset-btn.active { background: var(--gold); color: #1a1410; border-color: var(--gold-dark); }
+
+/* ============== Overlays ============== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.25s ease-out;
+}
+.overlay.hidden { display: none; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.overlay-card {
+  background: linear-gradient(180deg, #1a2e22 0%, #0d1c12 100%);
+  border: 1px solid #2a4531;
+  padding: 28px;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+}
+.hs-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--gold);
+  margin: 12px 0 20px;
+}
+.showdown-hands {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+  text-align: left;
+}
+.showdown-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid #1e3a26;
+  border-radius: 8px;
+}
+.showdown-row.winner {
+  border-color: var(--success);
+  background: rgba(46,204,113,0.1);
+  box-shadow: 0 0 12px rgba(46,204,113,0.3);
+}
+.showdown-row .name { width: 90px; font-weight: 700; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.showdown-row .cards { display: flex; gap: 4px; }
+.showdown-row .hand-name { margin-left: auto; color: var(--text-dim); font-size: 13px; font-style: italic; }
+.showdown-message { color: var(--text); font-size: 15px; margin: 12px 0; line-height: 1.4; }
+#showdownTitle { color: var(--gold); }
+
+/* ============== Turn indicator ============== */
+.turn-indicator {
+  position: absolute;
+  top: -10px; left: -10px;
+  width: 22px; height: 22px;
+  background: var(--highlight);
+  border-radius: 50%;
+  box-shadow: 0 0 14px var(--highlight);
+  animation: turnPulse 1.2s ease-in-out infinite;
+  pointer-events: none;
+  display: none;
+}
+@keyframes turnPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.7; }
+}
+
+/* ============== Toast ============== */
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.85);
+  color: var(--text);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  border: 1px solid #2a4531;
+  z-index: 200;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.toast.hidden { opacity: 0; transform: translate(-50%, 10px); }
+
+/* ============== Casino menu ============== */
+#menu {
+  background:
+    radial-gradient(ellipse at 50% 0%, #114a25 0%, #07321a 50%, #051a0e 100%);
+  align-items: center; justify-content: flex-start;
+  padding: 24px 16px 36px;
+}
+.menu-header { text-align: center; padding: 18px 0 6px; }
+.casino-title {
+  font-size: 48px; font-weight: 900; letter-spacing: 5px;
+  background: linear-gradient(180deg, #ffe27a 0%, #c9a233 60%, #946820 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 30px rgba(255,215,107,0.18);
+}
+.casino-subtitle { color: var(--text-dim); font-size: 13px; letter-spacing: 1px; margin-top: 4px; }
+
+.wallet-panel {
+  margin: 14px auto 22px;
+  background: linear-gradient(180deg, #15291c 0%, #0d1c12 100%);
+  border: 1px solid #1f3a26;
+  border-radius: 14px;
+  padding: 14px 18px 12px;
+  width: 100%; max-width: 580px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.wallet-label {
+  font-size: 11px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase;
+}
+.wallet-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.wallet-amount {
+  font-size: 36px; font-weight: 900; color: var(--gold);
+  text-shadow: 0 0 14px rgba(255,215,107,0.22);
+  transition: all 0.2s;
+}
+.wallet-buttons { display: flex; gap: 8px; }
+.chip-btn {
+  background: linear-gradient(180deg, #1f5a36 0%, #154528 100%);
+  color: var(--gold);
+  border: 1px solid #2a4531;
+  padding: 8px 14px; border-radius: 10px;
+  cursor: pointer; font-weight: 700; font-size: 14px;
+  transition: all 0.15s;
+}
+.chip-btn.small { padding: 6px 10px; font-size: 12px; }
+.chip-btn:hover { background: linear-gradient(180deg, #287b48 0%, #1a5530 100%); transform: translateY(-1px); }
+.wallet-meta { font-size: 12px; color: var(--text-dim); }
+
+.game-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  width: 100%; max-width: 880px;
+  margin-top: 4px;
+}
+.game-card {
+  background: linear-gradient(180deg, #1a2e22 0%, #0d1c12 100%);
+  border: 1px solid #2a4531;
+  border-radius: 16px;
+  padding: 28px 18px 22px;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.game-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: var(--gold-dark);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.5), 0 0 30px rgba(255,215,107,0.18);
+}
+.game-card-icon {
+  font-size: 56px; line-height: 1;
+  background: linear-gradient(180deg, #ffe27a 0%, #c9a233 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.game-card-name { font-size: 22px; font-weight: 800; color: var(--gold); letter-spacing: 0.5px; }
+.game-card-tagline { font-size: 13px; color: var(--text); }
+.game-card-meta { font-size: 11px; color: var(--text-dim); letter-spacing: 0.5px; }
+.game-card--poker .game-card-icon     { color: #1a4a30; background: linear-gradient(180deg, #a8e7c5 0%, #ffd76b 100%); -webkit-background-clip: text; background-clip: text; }
+.game-card--blackjack .game-card-icon { color: #1a1a1a; background: linear-gradient(180deg, #ffd8b3 0%, #ffd76b 100%); -webkit-background-clip: text; background-clip: text; }
+.game-card--roulette .game-card-icon  { color: #1a3a1f; background: linear-gradient(180deg, #c0392b 0%, #ffd76b 100%); -webkit-background-clip: text; background-clip: text; }
+
+.menu-footer { text-align: center; color: var(--text-dim); margin-top: 36px; }
+.menu-footer code { background: #0e1a12; padding: 1px 6px; border-radius: 4px; color: var(--gold); }
+
+/* ============== Shared game top bar ============== */
+.game-top-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 12px;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.45);
+  border-bottom: 1px solid #1e3a26;
+  position: sticky; top: 0; z-index: 10;
+}
+.back-btn {
+  background: rgba(201,162,51,0.1);
+  border: 1px solid #2a4531;
+  color: var(--gold);
+  padding: 7px 14px; border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  transition: all 0.15s;
+}
+.back-btn:hover { background: rgba(201,162,51,0.2); }
+.balance-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(180deg, #1f5a36 0%, #154528 100%);
+  padding: 6px 12px; border-radius: 999px;
+  border: 1px solid #2a4531;
+  justify-self: center;
+}
+.balance-pill span:first-child { color: var(--gold); }
+.balance-pill span:last-child { color: white; font-weight: 800; font-size: 16px; }
+.game-label { color: var(--gold); font-weight: 700; letter-spacing: 1px; font-size: 13px; text-transform: uppercase; }
+
+/* ============== Blackjack table ============== */
+.bj-table {
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  background: radial-gradient(ellipse at 50% 30%, #11804a 0%, #0a6b3a 60%, #085029 100%);
+  padding: 18px;
+  border: 8px solid #3b2010;
+  border-radius: 24px;
+  margin: 14px auto;
+  /* Match the poker felt's 720px ceiling so the table shrinks to fit
+     smaller screens. Centered with auto margins. */
+  max-width: 720px;
+  width: calc(100% - 28px);
+  min-height: 60vh;
+}
+.bj-dealer-area { text-align: center; }
+.bj-player-label {
+  font-size: 12px; letter-spacing: 2px; color: var(--gold); margin-bottom: 6px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.bj-player-label #bjDealerScore { font-weight: 800; margin-left: 8px; color: white; }
+.bj-hand { display: flex; gap: 6px; justify-content: center; min-height: 90px; align-items: center; }
+
+.bj-seats {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.bj-seat {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.32);
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: all 0.18s;
+}
+.bj-seat.bj-active { border-color: var(--gold); box-shadow: 0 0 16px rgba(255,215,107,0.55); transform: scale(1.04); }
+.bj-seat.bj-done { opacity: 0.75; }
+.bj-seat.bj-bust .bj-seat-frame { border-color: #e74c3c; }
+.bj-seat.bj-natural .bj-seat-frame { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,215,107,0.4); }
+.bj-seat-frame { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px; border: 1px dashed transparent; border-radius: 8px; }
+.bj-seat-name { font-weight: 700; font-size: 13px; color: var(--gold); }
+.bj-cards { display: flex; gap: 4px; }
+.bj-seat-foot { font-size: 11px; color: var(--text); display: flex; gap: 12px; }
+.bj-bet { color: var(--gold); font-weight: 700; }
+
+.bj-status { text-align: center; padding: 8px; color: white; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+
+.bj-actions {
+  background: rgba(0,0,0,0.5); border-top: 1px solid #1e3a26;
+  padding: 12px 16px; display: flex; gap: 8px; justify-content: center;
+}
+.bj-action { flex: 0 1 140px; padding: 12px; font-size: 14px; }
+
+#bjRoundResults { text-align: left; margin: 14px 0; }
+.bj-dealer-result { font-weight: 700; color: var(--gold); margin-bottom: 8px; }
+.bj-result-row {
+  display: grid; grid-template-columns: 1fr 1.4fr auto;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid #1e3a26;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+.bj-result-row.win  { border-color: var(--success); background: rgba(46,204,113,0.08); }
+.bj-result-row.lose { border-color: var(--danger);  background: rgba(231,76,60,0.08); }
+.bj-result-row.push { border-color: var(--text-dim); }
+.bj-r-name { font-weight: 700; color: var(--gold); }
+.bj-r-pnl { color: white; font-weight: 700; }
+.bj-result-row.win .bj-r-pnl  { color: var(--success); }
+.bj-result-row.lose .bj-r-pnl { color: var(--danger); }
+.bj-result-row.push .bj-r-pnl { color: var(--text-dim); }
+
+.overlay-actions { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
+.overlay-actions .primary-btn, .overlay-actions .ghost-btn { flex: 0 1 200px; margin-top: 0; }
+
+/* ============== Roulette table ============== */
+.rou-layout {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  grid-template-rows: auto auto;
+  gap: 12px;
+  padding: 12px;
+  background:
+    radial-gradient(ellipse at 50% 60%, #1a0e08 0%, #0a0604 100%);
+  border-radius: 16px;
+  margin: 14px auto;
+  /* Match the poker felt's 720px ceiling so the table shrinks to fit
+     smaller screens. Centered with auto margins. */
+  max-width: 720px;
+  width: calc(100% - 28px);
+}
+.rou-wheel-wrap {
+  grid-column: 2; grid-row: 1 / 3;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.rou-wheel {
+  position: relative;
+  width: min(280px, 45vmin); aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.rou-wheel-svg { width: 100%; height: 100%; }
+/* Pointer is now a hand-painted SVG triangle (not a text glyph) so it
+   scales without font fallback and matches the gold-rimmed wood wheel.
+   The ball is a separate absolutely-positioned element that JS drives
+   each frame along the rim, then into the pocket. */
+.rou-wheel-pointer {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  width: 14px;
+  height: 20px;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+  z-index: 10;
+  pointer-events: none;
+}
+.ptr-svg { display: block; width: 100%; height: 100%; }
+.rou-wheel-ball {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #fffef4 0%, #ece4c8 55%, #b8b09a 100%);
+  box-shadow:
+    0 0 10px rgba(255,255,240,0.55),
+    inset -1px -2px 2px rgba(0,0,0,0.25);
+  display: none;       /* shown during the spin by performSpinAnimation() */
+  z-index: 6;
+  pointer-events: none;
+  will-change: left, top;
+}
+.rou-wheel-result {
+  position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: rgba(20,30,20,0.92);
+  padding: 8px 18px; border-radius: 999px;
+  font-weight: 800; color: white; font-size: 15px;
+  border: 2px solid var(--gold);
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  display: none;
+  z-index: 9;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.5);
+}
+/* After each spin lands, the result badge pops in over the wheel hub
+   with a tiny overshoot — feels like a croupier flipping a result card
+   up. spin() toggles .visible; empty offsetWidth read forces the pop
+   animation to re-fire on consecutive spins. */
+.rou-wheel-result.visible {
+  display: block;
+  animation: resultPop 0.7s cubic-bezier(0.16, 1.2, 0.44, 1) both;
+}
+@keyframes resultPop {
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+  60%  { transform: translate(-50%, -50%) scale(1.18); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.rou-status { color: var(--text); font-size: 14px; min-height: 22px; text-align: center; }
+.rou-spin-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.rou-chip-stacker { display: inline-flex; gap: 6px; align-items: center; }
+.rou-chip-stacker > span:first-child { color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-right: 4px; }
+.rou-stake-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 180px; height: 20px;            /* matches thumb so thumb's natural center aligns with slider's center */
+  background: transparent;
+  outline: none; cursor: pointer;
+  margin: 0 4px;
+  padding: 0;
+}
+.rou-stake-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--gold) var(--progress, 0%),
+    rgba(201,162,51,0.30) var(--progress, 0%),
+    rgba(201,162,51,0.30) 100%
+  );
+  border-radius: 999px;
+}
+.rou-stake-slider::-moz-range-track {
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--gold) var(--progress, 0%),
+    rgba(201,162,51,0.30) var(--progress, 0%),
+    rgba(201,162,51,0.30) 100%
+  );
+  border-radius: 999px;
+}
+.rou-stake-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; border: 3px solid var(--gold);
+  cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  transition: transform 0.08s;
+  margin-top: -7px;                        /* visually centers a 20px thumb on the 6px track (20-6)/2 */
+}
+.rou-stake-slider:hover::-webkit-slider-thumb { transform: scale(1.10); margin-top: -7px; }
+.rou-stake-slider::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; border: 3px solid var(--gold);
+  cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+.rou-stake-label {
+  min-width: 60px; text-align: center;
+  font-weight: 800; color: var(--gold); font-size: 14px;
+  background: rgba(0,0,0,0.4); padding: 3px 8px; border-radius: 6px;
+  border: 1px solid rgba(201,162,51,0.30);
+}
+
+.primary-btn.small { width: auto; padding: 10px 20px; font-size: 13px; margin-top: 0; box-shadow: 0 2px 0 #8a6e1e; }
+
+.rou-grid-wrap {
+  /* Layout helper reserved in case future bets need grouping inside
+     the rou-layout grid. Currently empty after the 0-36 grid was
+     consolidated into the standalone .rou-number-panel — left as a
+     no-op so any future code referencing this class doesn't break. */
+  display: contents;
+}
+.rou-grid {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(36px, 1fr));
+  gap: 4px;
+  width: 100%;
+}
+.rou-cell {
+  position: relative;
+  aspect-ratio: 1.4 / 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 6px;
+  color: white; font-weight: 800;
+  cursor: pointer;
+  font-size: 16px;
+  user-select: none;
+  transition: all 0.1s;
+  border: 1px solid #2a1810;
+}
+.rou-cell.empty { background: transparent; cursor: default; border: none; }
+.rou-cell.zero { background: #27ae60; grid-row: span 2; aspect-ratio: 1; font-size: 22px; }
+.rou-cell.red   { background: #c0392b; }
+.rou-cell.black { background: #1a1a1a; }
+.rou-cell:hover:not(.empty) { filter: brightness(1.25); transform: translateY(-1px); }
+.rou-cell-stack { position: absolute; bottom: 3px; left: 3px; display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
+.rou-cell-total {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffe27a;
+  background: rgba(0,0,0,0.68);
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(201,162,51,0.40);
+  letter-spacing: 0.3px;
+  text-shadow: 0 0 6px rgba(255,215,107,0.35);
+}
+
+/* Outside-bet row now sits below the 1-36 number panel (instead of
+   next to the removed 0-36 grid), so it gets a clean 4-col single
+   row of full-width buttons with breathing room above the toast. */
+.rou-outer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 4px 14px 14px;
+}
+.rou-out {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  font-weight: 700; font-size: 14px; letter-spacing: 1px;
+  color: white; cursor: pointer;
+  background: #1a1a1a;
+  border: 1px solid #2a1810;
+  user-select: none;
+  transition: all 0.1s;
+  height: 54px;
+}
+.rou-out:hover { filter: brightness(1.2); transform: translateY(-1px); }
+.rou-out.red   { background: #c0392b; }
+.rou-out.black { background: #1a1a1a; }
+.rou-out .rou-cell-stack { left: 6px; }
+.rou-spec {
+  background: rgba(0,0,0,0.45);
+  border: 1px solid #2a1810;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column; gap: 2px;
+}
+.rou-spec-name { color: var(--gold); font-weight: 700; font-size: 13px; }
+.rou-spec-bal  { color: white; font-weight: 700; }
+.rou-spec-bets { color: var(--text-dim); font-size: 11px; min-height: 14px; }
+
+/* ============== Purchase table ============== */
+
+/* ============== Roulette / BJ cancel rows ==============
+   Cancel button row shown ABOVE the table area so the user has a
+   prominent pre-round / pre-spin exit. After-the-round exits are
+   already handled by the existing #leaveBtn / #bjLeaveBtn /
+   poker cash-out button. */
+.bj-cancel-row, .rou-cancel-row {
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px;
+  background: rgba(0,0,0,0.35);
+  border-bottom: 1px solid #1e3a26;
+}
+.ghost-btn.danger {
+  border-color: #6b1a26;
+  color: #ffc9d2;
+  background: rgba(107, 26, 38, 0.18);
+}
+.ghost-btn.danger:hover {
+  background: rgba(107, 26, 38, 0.45);
+  color: #ffe5ea;
+}
+
+/* ============== Roulette number panel ==============
+   36 individual number buttons (1-18 row + 19-36 row) replace the old
+   '1 – 18' / '19 – 36' range buttons. Each clickable for a 35x
+   straight-up bet. A standalone green 0 button sits in its own row
+   above the 1-18 / 19-36 split so the single-zero doesn't share a row
+   with the small per-number buttons. The OLD main 0-36 grid was
+   removed — its 13-col layout caused a row-3 64px column squeeze that
+   visually blocked the outside-bet buttons. */
+.rou-number-panel {
+  margin: 8px 14px 6px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+
+.rou-zero-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+.rou-num-cell.zero {
+  background: #27ae60;
+  border-color: #1e6d3f;
+  color: #f0e9d6;
+  font-size: 18px;
+  font-weight: 800;
+  padding: 6px 0;
+  min-height: 38px;
+  min-width: 110px;
+  max-width: 140px;
+  border-radius: 6px;
+}
+.rou-num-row {
+  display: grid;
+  grid-template-columns: repeat(18, 1fr);
+  gap: 3px;
+}
+.rou-num-cell {
+  position: relative;
+  background: #1a1a1a;
+  color: #f0e9d6;
+  text-align: center;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 4px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid #2a1810;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.1s, transform 0.1s;
+}
+.rou-num-cell.red   { background: #c0392b; color: #fffaf0; }
+.rou-num-cell.black { background: #1a1a1a; color: #f0e9d6; }
+.rou-num-cell:hover { filter: brightness(1.25); transform: translateY(-1px); }
+.rou-num-cell .rou-cell-stack {
+  position: absolute;
+  bottom: 1px;
+  left: 1px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  align-items: center;
+}
+
+/* ============== Responsive ============== */
+@media (max-width: 760px) {
+  .felt { aspect-ratio: 6 / 4; }
+  .card { width: 44px; height: 62px; font-size: 13px; }
+  .card.small { width: 34px; height: 48px; font-size: 11px; }
+  .seat-frame { min-width: 90px; padding: 4px 6px; }
+  .seat-name { font-size: 11px; }
+  .seat-chips { font-size: 10px; }
+  .action-panel { grid-template-columns: 1fr; gap: 8px; }
+  .bet-controls { grid-template-columns: 1fr 1fr 1fr; }
+  .title { font-size: 28px; }
+}
+
+/* ============== Tier themes ============== */
+/* Each tier swaps the page background gradient and accent. The game
+   tables (felt, BJ green, roulette black) keep their own look. These
+   themes only color the casino menu, top bars, and overlays. */
+
+body.tier-principiante {
+  background: radial-gradient(ellipse at 50% 0%, #4b3424 0%, #2a1c12 50%, #150c08 100%);
+}
+body.tier-novizio {
+  background: radial-gradient(ellipse at 50% 0%, #1a2a55 0%, #0a1230 50%, #050818 100%);
+}
+body.tier-avanzato {
+  background: radial-gradient(ellipse at 50% 0%, #4d1822 0%, #2a0c12 50%, #150508 100%);
+}
+body.tier-esperto {
+  background: radial-gradient(ellipse at 50% 0%, #4d3a10 0%, #2a1f05 50%, #150e02 100%);
+}
+body.tier-professionale {
+  background: radial-gradient(ellipse at 50% 0%, #2c0e4a 0%, #150428 50%, #08020f 100%);
+}
+
+/* Game top bars receive the tier accent */
+body.tier-novizio       .game-top-bar { background: linear-gradient(90deg, rgba(126,166,232,0.10), rgba(20,30,60,0.40) 50%, rgba(126,166,232,0.10)); border-bottom-color: #2a4070; }
+body.tier-avanzato      .game-top-bar { background: linear-gradient(90deg, rgba(194,91,107,0.12), rgba(40,15,20,0.45) 50%, rgba(194,91,107,0.12)); border-bottom-color: #4d1822; }
+body.tier-esperto       .game-top-bar { background: linear-gradient(90deg, rgba(212,175,55,0.16), rgba(40,28,8,0.45)   50%, rgba(212,175,55,0.16)); border-bottom-color: #4d3a10; }
+body.tier-professionale .game-top-bar { background: linear-gradient(90deg, rgba(184,146,255,0.18), rgba(30,10,55,0.50) 50%, rgba(184,146,255,0.18)); border-bottom-color: #2c0e4a; }
+
+/* Wallet panel uses tier accent for the amount glow */
+body.tier-principiante  .wallet-amount { text-shadow: 0 0 16px rgba(212,165,116,0.30); }
+body.tier-novizio       .wallet-amount { text-shadow: 0 0 16px rgba(126,166,232,0.35); }
+body.tier-avanzato      .wallet-amount { text-shadow: 0 0 16px rgba(194,91,107,0.35); }
+body.tier-esperto       .wallet-amount { text-shadow: 0 0 18px rgba(212,175,55,0.42); }
+body.tier-professionale .wallet-amount { text-shadow: 0 0 22px rgba(184,146,255,0.50); }
+
+/* Casino title changes color per tier */
+body.tier-novizio       .casino-title { background: linear-gradient(180deg, #cfe0ff 0%, #7ea6e8 50%, #382c8c 100%); -webkit-background-clip: text; background-clip: text; }
+body.tier-avanzato      .casino-title { background: linear-gradient(180deg, #ffd5dc 0%, #c25b6b 50%, #4d1822 100%); -webkit-background-clip: text; background-clip: text; }
+body.tier-esperto       .casino-title { background: linear-gradient(180deg, #ffefb3 0%, #d4af37 50%, #6d4f0a 100%); -webkit-background-clip: text; background-clip: text; }
+body.tier-professionale .casino-title { background: linear-gradient(180deg, #eadfff 0%, #b892ff 50%, #4a2c80 100%); -webkit-background-clip: text; background-clip: text; }
+
+/* ============== Tier badge ============== */
+.tier-badge {
+  margin-top: 8px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.18));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 8px 12px 10px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.tier-badge-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.tier-badge-name { font-weight: 800; font-size: 14px; color: #ffd76b; letter-spacing: 0.5px; }
+.tier-badge-peak { font-size: 11px; color: var(--text-dim); }
+.tier-badge-progress { font-size: 11px; color: var(--text-dim); letter-spacing: 0.3px; }
+.tier-badge-bar-wrap {
+  height: 6px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden;
+}
+.tier-badge-bar {
+  height: 100%; width: 0;
+  background: linear-gradient(90deg, #c9a233, #ffd76b);
+  transition: width 0.6s ease;
+  border-radius: 999px;
+}
+/* ============== Static tier showcase ==============
+   Lives in the casino menu's empty green area only. Shows the player's
+   current tier prominently; the dynamic tier-up modal (#tierUpOverlay)
+   fires only when crossing a threshold and is hidden by default. */
+.tier-showcase {
+  margin: 26px auto 0;
+  width: 100%;
+  max-width: 580px;
+  background: linear-gradient(180deg, #1a2e22 0%, #0d1c12 100%);
+  border: 1px solid var(--gold-dark);
+  border-radius: 14px;
+  padding: 18px 24px 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 18px rgba(255,215,107,0.18);
+}
+.tier-showcase-stars {
+  font-size: 22px;
+  color: var(--gold);
+  letter-spacing: 14px;
+}
+.tier-showcase-crest {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  margin: 6px 0 10px;
+}
+.tier-showcase-name {
+  font-size: 28px;
+  font-weight: 900;
+  margin: 0 0 6px;
+  background: linear-gradient(180deg, #ffe27a 0%, #c9a233 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.tier-showcase-sub {
+  color: var(--text);
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+.tier-showcase-rule {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.tier-badge--principiante .tier-badge-name { color: #d4a574; }
+.tier-badge--novizio       .tier-badge-name { color: #9bb8ec; }
+.tier-badge--novizio       .tier-badge-bar  { background: linear-gradient(90deg, #4a72c0, #9bb8ec); }
+.tier-badge--avanzato      .tier-badge-name { color: #d97a87; }
+.tier-badge--avanzato      .tier-badge-bar  { background: linear-gradient(90deg, #6b1a26, #d97a87); }
+.tier-badge--esperto       .tier-badge-name { color: #d4af37; }
+.tier-badge--esperto       .tier-badge-bar  { background: linear-gradient(90deg, #6d4f0a, #d4af37); }
+.tier-badge--professionale .tier-badge-name { color: #c4a8ff; }
+.tier-badge--professionale .tier-badge-bar  { background: linear-gradient(90deg, #4a2c80, #c4a8ff); }
+
+/* ============== Tier-up overlay ============== */
+.tier-up { z-index: 150; }
+.tier-up-card {
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.06), rgba(0,0,0,0.55));
+  border: 1px solid #c9a233;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 36px rgba(255,215,107,0.25);
+  animation: tierUpGlow 2.4s ease-in-out infinite alternate;
+}
+@keyframes tierUpGlow {
+  0%   { box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 30px rgba(255,215,107,0.20); }
+  100% { box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 60px rgba(255,215,107,0.45); }
+}
+.tier-up-stars { font-size: 22px; letter-spacing: 14px; color: #ffd76b; }
+.tier-up-crest {
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: #c9a233; margin: 4px 0 8px;
+}
+.tier-up-name {
+  font-size: 34px; font-weight: 900; letter-spacing: 0.5px;
+  background: linear-gradient(180deg, #ffe27a 0%, #c9a233 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin: 0 0 6px;
+}
+.tier-up-sub { color: var(--text); font-size: 15px; margin: 4px 0 14px; }
+.tier-up-rule { color: var(--text-dim); font-size: 12px; line-height: 1.5; margin: 0 0 18px; padding: 0 12px; }
+
+.tier-up--principiante .tier-up-card { border-color: #d4a574; }
+.tier-up--principiante .tier-up-name { background: linear-gradient(180deg, #f5d6a8 0%, #d4a574 100%); -webkit-background-clip: text; background-clip: text; }
+.tier-up--novizio       .tier-up-card { border-color: #7ea6e8; }
+.tier-up--novizio       .tier-up-name { background: linear-gradient(180deg, #cfe0ff 0%, #7ea6e8 100%); -webkit-background-clip: text; background-clip: text; }
+.tier-up--avanzato      .tier-up-card { border-color: #c25b6b; }
+.tier-up--avanzato      .tier-up-name { background: linear-gradient(180deg, #ffd5dc 0%, #c25b6b 100%); -webkit-background-clip: text; background-clip: text; }
+.tier-up--esperto       .tier-up-card { border-color: #d4af37; }
+.tier-up--esperto       .tier-up-name { background: linear-gradient(180deg, #ffefb3 0%, #d4af37 100%); -webkit-background-clip: text; background-clip: text; }
+.tier-up--professionale .tier-up-card { border-color: #b892ff; }
+.tier-up--professionale .tier-up-name { background: linear-gradient(180deg, #eadfff 0%, #b892ff 100%); -webkit-background-clip: text; background-clip: text; }
+
+/* ============== Winner-pulse rings ==============
+   Illuminates the winning pocket as the ball settles. Two concentric
+   expanding gold rings staggered 0.45s give a casino-light-burst.
+   Position set in JS to match the post-settle ball coords (top,
+   inside the pocket band). Triggered by spin() via .visible;
+   cancelled by cashOut()/startGame() removing .visible. */
+.rou-pulse {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 5;
+  display: none;
+}
+.rou-pulse::before,
+.rou-pulse::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+.rou-pulse::before {
+  background: radial-gradient(circle at center,
+    rgba(255,236,160,0.65) 0%,
+    rgba(255,215,107,0.35) 40%,
+    transparent 75%
+  );
+}
+.rou-pulse::after {
+  background: radial-gradient(circle at center,
+    rgba(255,255,210,0.50) 0%,
+    rgba(255,215,107,0.28) 35%,
+    transparent 70%
+  );
+}
+.rou-pulse.visible { display: block; }
+.rou-pulse.visible::before {
+  animation: pulseRing 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.rou-pulse.visible::after {
+  animation: pulseRing 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+@keyframes pulseRing {
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0;   }
+  20%  { transform: translate(-50%, -50%) scale(0.9); opacity: 1;   }
+  100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0;   }
+}

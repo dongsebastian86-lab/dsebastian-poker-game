@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casino — Poker · Blackjack · Roulette</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- =================== CASINO MENU =================== -->
+  <div id="menu" class="screen active">
+    <header class="menu-header">
+      <h1 class="casino-title">♠♥♦♣ CASINO ROYALE</h1>
+      <p class="casino-subtitle">Pick your table. The house is watching.</p>
+    </header>
+
+    <section class="wallet-panel">
+      <div class="wallet-label">YOUR BANKROLL</div>
+      <div class="wallet-row">
+        <div class="wallet-amount" id="walletAmount">1,000</div>
+        <div class="wallet-buttons">
+          <button class="chip-btn small" id="resetWalletBtn">Reset</button>
+        </div>
+      </div>
+      <div class="wallet-meta">
+        <span id="walletStats">Hands played: 0 · Net: 0</span>
+      </div>
+      <div id="tierBadge" class="tier-badge tier-badge--principiante">
+        <div class="tier-badge-row">
+          <span class="tier-badge-name">✦ Caffè del Gioco</span>
+          <span class="tier-badge-peak">Peak: 1,000</span>
+        </div>
+        <div class="tier-badge-progress">Next: Casino della Stella</div>
+        <div class="tier-badge-bar-wrap"><div class="tier-badge-bar"></div></div>
+      </div>
+    </section>
+
+    <section class="game-cards">
+      <button class="game-card game-card--poker" data-game="poker">
+        <div class="game-card-icon">♠</div>
+        <div class="game-card-name">Texas Hold'em</div>
+        <div class="game-card-tagline">No-limit · Multiplayer</div>
+        <div class="game-card-meta">vs Bots · Hot-Seat</div>
+      </button>
+
+      <button class="game-card game-card--blackjack" data-game="blackjack">
+        <div class="game-card-icon">21</div>
+        <div class="game-card-name">Blackjack</div>
+        <div class="game-card-tagline">Beat the dealer to 21</div>
+        <div class="game-card-meta">vs Bots · Hot-Seat</div>
+      </button>
+
+      <button class="game-card game-card--roulette" data-game="roulette">
+        <div class="game-card-icon">◉</div>
+        <div class="game-card-name">Roulette</div>
+        <div class="game-card-tagline">European wheel · 0–36</div>
+        <div class="game-card-meta">vs Bots (spectators)</div>
+      </button>
+    </section>
+
+    <!-- ============= Static tier showcase (lives in the casino menu's
+         empty green space — never visible inside any game screen). The
+         dynamic tier-up modal (#tierUpOverlay) remains hidden by default
+         and only appears as a popup when the player crosses a tier
+         threshold. ============= -->
+    <section class="tier-showcase">
+      <div class="tier-showcase-stars">✦ ✦ ✦</div>
+      <div class="tier-showcase-crest">YOUR CURRENT CASINO</div>
+      <h2 class="tier-showcase-name">Caffè del Gioco</h2>
+      <p class="tier-showcase-sub">Principiante</p>
+      <p class="tier-showcase-rule">Minimum bets 5 · AI plays at 1.00× skill</p>
+    </section>
+
+    <footer class="menu-footer">
+      <small>Token wallet only — no real money · Progress saved in this browser. Open <code>poker-game/index.html</code> in any browser.</small>
+    </footer>
+  </div>
+
+  <!-- =================== TIER-UP OVERLAY =================== -->
+  <div id="tierUpOverlay" class="overlay hidden tier-up tier-up--principiante">
+    <div class="overlay-card tier-up-card">
+      <div class="tier-up-stars">✦ ✦ ✦</div>
+      <div class="tier-up-crest">CASINO UPGRADE</div>
+      <h2 id="tierUpName" class="tier-up-name">Caffè del Gioco</h2>
+      <p id="tierUpSub" class="tier-up-sub">Welcome, Principiante.</p>
+      <p id="tierUpRule" class="tier-up-rule">New house rules: minimum bets 5, AI plays at 1.00× skill.</p>
+      <button class="primary-btn" id="tierUpDismissBtn">Take My Seat</button>
+    </div>
+  </div>
+
+  <!-- =================== CONFIRM FORFEIT OVERLAY ===================
+       Generic Yes/Cancel dialog driven by Casino.confirmForfeit().
+       Each game's cashOut() awaits it before deducting chips / leaving
+       the table. Hidden by default. -->
+  <div id="confirmOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <h2 id="confirmTitle" class="tier-up-name" style="font-size:24px;margin-bottom:8px;">Leave the table?</h2>
+      <p id="confirmMessage" class="showdown-message">You'll forfeit your table stack.</p>
+      <div class="overlay-actions">
+        <button id="confirmYesBtn" class="primary-btn" style="background:linear-gradient(180deg,#e74c3c 0%,#a93226 100%);box-shadow:0 4px 0 #6b1a1a,0 6px 18px rgba(231,76,60,0.4);color:white;">Yes, leave</button>
+        <button id="confirmNoBtn" class="ghost-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== POKER TABLE =================== -->
+  <div id="pokerScreen" class="screen">
+    <div class="game-top-bar">
+      <button class="back-btn" data-back>← Casino</button>
+      <div class="balance-pill"><span>♠</span><span id="pokerBalance">1,000</span></div>
+      <div class="game-label">Texas Hold'em</div>
+    </div>
+
+    <!-- Original poker lobby, hidden behind a screen -->
+    <div id="pokerLobbyScreen" class="screen">
+      <div class="lobby-card">
+        <h2 class="title">Texas Hold'em</h2>
+        <p class="subtitle">No-limit · Choose your setup</p>
+
+        <div class="form-row">
+          <label>Game Mode</label>
+          <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="ai">vs AI Bots</button>
+            <button class="mode-btn" data-mode="hotseat">Hot-Seat Multiplayer</button>
+          </div>
+        </div>
+        <div class="form-row" id="aiOptions">
+          <label>Number of AI opponents</label>
+          <div class="counter">
+            <button class="counter-btn" data-target="aiCount" data-dir="-1">−</button>
+            <span class="counter-value" id="aiCountValue">3</span>
+            <button class="counter-btn" data-target="aiCount" data-dir="1">+</button>
+          </div>
+          <small>You + 3 to 6 AI opponents (4–7 at the table)</small>
+        </div>
+        <div class="form-row hidden" id="hotOptions">
+          <label>Total players on this device</label>
+          <div class="counter">
+            <button class="counter-btn" data-target="hsCount" data-dir="-1">−</button>
+            <span class="counter-value" id="hsCountValue">3</span>
+            <button class="counter-btn" data-target="hsCount" data-dir="1">+</button>
+          </div>
+          <small>2 to 6 players, taking turns on this device</small>
+        </div>
+        <div class="form-row">
+          <label>Buy-in (from your bankroll)</label>
+          <div class="slider-row">
+            <input type="range" id="buyinSlider" min="5" max="50000" value="200" step="1" />
+            <span class="slider-value" id="buyinSliderValue">200</span>
+          </div>
+          <small id="buyinHint">Bankroll: 1,000 · Buy-in deducts on Deal Me In</small>
+        </div>
+        <div class="form-row">
+          <label>Blinds <small style="font-weight:normal;opacity:0.7">(small / big — 2× ratio)</small></label>
+          <div class="slider-row">
+            <input type="range" id="blindsSlider" min="1" max="50" value="5" step="1" />
+            <span class="slider-value" id="blindsSliderValue">5 / 10</span>
+          </div>
+        </div>
+        <button id="startGameBtn" class="primary-btn">Deal Me In</button>
+        <button class="lobby-cancel" data-back>← Back to Casino (no bet placed yet)</button>
+      </div>
+    </div>
+
+    <!-- The actual poker table UI -->
+    <div id="table" class="screen">
+      <div class="top-bar">
+        <div class="pot-display"><span class="label">POT</span><span id="potAmount">0</span></div>
+        <div class="round-display"><span id="roundName">Pre-Flop</span></div>
+        <button id="leaveBtn" class="ghost-btn">Leave Table</button>
+      </div>
+      <div class="poker-status-bar">
+        <div class="poker-status-pill">
+          <span class="pill-label">SB</span><span id="sbName" class="pill-value">—</span>
+        </div>
+        <div class="poker-status-pill">
+          <span class="pill-label">BB</span><span id="bbName" class="pill-value">—</span>
+        </div>
+        <div class="poker-status-pill turn-pill">
+          <span class="pill-label">TURN</span><span id="turnName" class="pill-value">—</span>
+        </div>
+      </div>
+      <div class="table-area">
+        <div class="felt">
+          <div class="community-row">
+            <div id="communityCards" class="community-cards"></div>
+            <div class="pot-pile">
+              <div class="chip-stack" id="potChip"></div>
+              <div class="pot-pile-label hidden" id="potLabel">—</div>
+            </div>
+          </div>
+          <div id="seats" class="seats"></div>
+        </div>
+      </div>
+      <div id="actionPanel" class="action-panel hidden">
+        <div class="player-info">
+          <div id="actionPlayerName">—</div>
+          <div id="actionPlayerChips">—</div>
+        </div>
+        <div class="bet-controls">
+          <button class="action-btn fold" data-action="fold">Fold</button>
+          <button class="action-btn check" data-action="check">Check</button>
+          <button class="action-btn call" data-action="call">Call</button>
+        </div>
+        <div class="raise-controls">
+          <div class="raise-row">
+            <input type="range" id="raiseSlider" min="0" max="100" value="50" />
+            <span id="raiseAmount">0</span>
+          </div>
+          <div class="raise-presets">
+            <button class="preset-btn" data-frac="0.5">½ Pot</button>
+            <button class="preset-btn" data-frac="1">Pot</button>
+            <button class="preset-btn" data-frac="2">2× Pot</button>
+            <button class="preset-btn" data-frac="allin">All-In</button>
+          </div>
+          <button class="action-btn raise" data-action="raise">Raise</button>
+        </div>
+      </div>
+      <div id="hsOverlay" class="overlay hidden">
+        <div class="overlay-card">
+          <h2>Pass the device to</h2>
+          <div id="hsPlayerName" class="hs-name">Player</div>
+          <p>Their hole cards are hidden. Tap when you're ready.</p>
+          <button id="hsReadyBtn" class="primary-btn">I'm Ready</button>
+        </div>
+      </div>
+      <div id="showdownOverlay" class="overlay hidden">
+        <div class="overlay-card">
+          <h2 id="showdownTitle">Showdown</h2>
+          <div id="showdownHands" class="showdown-hands"></div>
+          <p id="showdownMessage" class="showdown-message"></p>
+          <div class="overlay-actions">
+            <button id="nextHandBtn" class="primary-btn">Next Hand</button>
+            <button id="pokerCashOutBtn" class="ghost-btn">Cash Out & Leave</button>
+          </div>
+        </div>
+      </div>
+      <div id="toast" class="toast hidden"></div>
+    </div>
+  </div>
+
+  <!-- =================== BLACKJACK =================== -->
+  <div id="blackjackScreen" class="screen">
+    <div class="game-top-bar">
+      <button class="back-btn" data-back>← Casino</button>
+      <div class="balance-pill"><span>♠</span><span id="blackjackBalance">1,000</span></div>
+      <div class="game-label">Blackjack</div>
+    </div>
+
+    <div id="blackjackLobby" class="screen active">
+      <div class="lobby-card">
+        <h2 class="title">Blackjack</h2>
+        <p class="subtitle">Beat the dealer to 21 · 3:2 pays on natural</p>
+        <div class="form-row">
+          <label>Game Mode</label>
+          <div class="mode-toggle">
+            <button class="mode-btn bj-mode active" data-bjmode="bots">vs Bots</button>
+            <button class="mode-btn bj-mode" data-bjmode="hotseat">Hot-Seat Players</button>
+          </div>
+        </div>
+        <div class="form-row" id="bjBotsOptions">
+          <label>Bot opponents at the table</label>
+          <div class="slider-row">
+            <input type="range" id="bjBotsSlider" min="1" max="3" step="1" value="1" />
+            <span class="slider-value" id="bjBotsValue">1</span>
+          </div>
+          <small>You + 1–3 bots + dealer</small>
+        </div>
+        <div class="form-row hidden" id="bjHotOptions">
+          <label>Total hot-seat players</label>
+          <div class="slider-row">
+            <input type="range" id="bjHotCountSlider" min="2" max="6" step="1" value="2" />
+            <span class="slider-value" id="bjHotCountValue">2</span>
+          </div>
+          <small>2–6 players pass-and-play, dealer is bot</small>
+        </div>
+        <div class="form-row">
+          <label>Min bet per round</label>
+          <div class="slider-row">
+            <input type="range" id="bjMinBetSlider" min="10" max="500" step="5" value="10" />
+            <span class="slider-value" id="bjMinBetValue">10</span>
+          </div>
+          <small id="bjMinBetHint">Tier minimum is enforced at deal time</small>
+        </div>
+        <button id="bjStartBtn" class="primary-btn">Sit Down</button>
+        <button class="lobby-cancel" data-back>← Back to Casino (no bet placed yet)</button>
+      </div>
+    </div>        <div id="blackjackTable" class="screen">
+          <div class="bj-table">
+        <div class="bj-dealer-area">
+          <div class="bj-player-label">DEALER <span id="bjDealerScore">—</span></div>
+          <div class="bj-hand" id="bjDealerHand"></div>
+        </div>
+        <div class="bj-seats" id="bjSeats"></div>
+        <div class="bj-status" id="bjStatus">Place your bets</div>
+      </div>
+      <div id="bjActions" class="bj-actions hidden">
+        <button class="action-btn bj-action" data-bj="hit">Hit</button>
+        <button class="action-btn bj-action" data-bj="stand">Stand</button>
+        <button class="action-btn bj-action" data-bj="double">Double</button>
+        <button class="action-btn bj-action" data-bj="deal">Deal</button>
+      </div>
+      <div id="bjHotOverlay" class="overlay hidden">
+        <div class="overlay-card">
+          <h2>Pass the device to</h2>
+          <div id="bjHotName" class="hs-name">Player</div>
+          <p>Hole cards are hidden. Tap when ready.</p>
+          <button id="bjHotReadyBtn" class="primary-btn">I'm Ready</button>
+        </div>
+      </div>
+      <div id="bjRoundOverlay" class="overlay hidden">
+        <div class="overlay-card">
+          <h2 id="bjRoundTitle">Round Results</h2>
+          <div id="bjRoundResults" class="bj-round-results"></div>
+          <div class="overlay-actions">
+            <button id="bjNextRoundBtn" class="primary-btn">Next Round</button>
+            <button id="bjLeaveBtn" class="ghost-btn">Leave Table</button>
+          </div>
+        </div>
+      </div>
+      <div id="bjToast" class="toast hidden"></div>
+    </div>
+  </div>
+
+  <!-- =================== ROULETTE =================== -->
+  <div id="rouletteScreen" class="screen">
+    <div class="game-top-bar">
+      <button class="back-btn" data-back>← Casino</button>
+      <div class="balance-pill"><span>♠</span><span id="rouletteBalance">1,000</span></div>
+      <div class="game-label">Roulette</div>
+    </div>
+
+    <div id="rouletteLobby" class="screen active">
+      <div class="lobby-card">
+        <h2 class="title">Roulette</h2>
+        <p class="subtitle">European wheel · Single zero · 0–36</p>
+        <div class="form-row">
+          <label>Bot spectators at the table</label>
+          <div class="counter">
+            <button class="counter-btn" data-target="rouBots" data-dir="-1">−</button>
+            <span class="counter-value" id="rouBotsValue">2</span>
+            <button class="counter-btn" data-target="rouBots" data-dir="1">+</button>
+          </div>
+          <small>They place random bets but don't affect your bankroll</small>
+        </div>
+        <button id="rouStartBtn" class="primary-btn">Take a Seat</button>
+        <button class="lobby-cancel" data-back>← Back to Casino (no bet placed yet)</button>
+      </div>
+    </div>    <div id="rouletteTable" class="screen">
+          <div class="rou-layout">
+        <!-- Other bettors at the table -->
+        <aside class="rou-spectators" id="rouSpectators"></aside>
+
+        <!-- The wheel -->
+        <div class="rou-wheel-wrap">
+          <div class="rou-wheel" id="rouWheel">
+            <svg viewBox="0 0 200 200" class="rou-wheel-svg"></svg>
+            <div class="rou-wheel-pointer">
+              <svg viewBox="0 0 14 20" class="ptr-svg">
+                <defs>
+                  <linearGradient id="ptrGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#fff8d8"/>
+                    <stop offset="100%" stop-color="#c9a233"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 7 19 L 1 3 L 13 3 Z" fill="url(#ptrGrad)" stroke="#8a6e1e" stroke-width="1.2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="rou-wheel-ball" id="rouBall"></div>
+            <div class="rou-pulse" id="rouPulse"></div>
+            <div class="rou-wheel-result" id="rouResult">—</div>
+          </div>
+          <div class="rou-status" id="rouStatus">Place your bets</div>
+          <div class="rou-spin-row">
+            <div class="rou-chip-stacker">
+              <span>Stake:</span>
+              <input type="range" id="rouStakeSlider" class="rou-stake-slider" min="5" max="50" step="1" value="10" />
+              <span class="rou-stake-label" id="rouStakeLabel">10</span>
+            </div>
+            <button id="rouClearBtn" class="ghost-btn small">Clear</button>
+            <button id="rouSpinBtn" class="primary-btn small">Spin</button>
+          </div>
+        </div>
+
+        </div>
+          <div class="rou-number-panel">
+            <div class="rou-zero-row" id="rouNumsZero"></div>
+            <div class="rou-num-row" id="rouNumsLow"></div>
+            <div class="rou-num-row" id="rouNumsHigh"></div>
+          </div>
+          <div class="rou-outer" id="rouOuter"></div>
+      <div id="rouToast" class="toast hidden"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="casino.js"></script>
+  <script src="poker.js"></script>
+  <script src="blackjack.js"></script>
+  <script src="roulette.js"></script>
+</body>
+</html>
