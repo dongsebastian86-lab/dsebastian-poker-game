@@ -868,93 +868,918 @@ body {
 }
 .toast.hidden { opacity: 0; transform: translate(-50%, 10px); }
 
-/* ============== Casino menu ============== */
-#menu {
-  background:
-    radial-gradient(ellipse at 50% 0%, #114a25 0%, #07321a 50%, #051a0e 100%);
-  align-items: center; justify-content: flex-start;
-  padding: 24px 16px 36px;
+/* =========================================================
+   CASINO LOBBY — top-down "casino floor" view
+   ---------------------------------------------------------
+   Replaces the old stacked menu with three real-world-modeled
+   tables (Hold'em racetrack, Blackjack kidney, Roulette
+   rectangle w/ wheel + grid) side-by-side. A single HUD bar
+   at the top holds the wallet. A ribbon beneath shows the
+   current casino (tier showcase) with a tier-progress bar.
+   Tables and the entire lobby escalate with body.tier-*
+   via CSS variables.
+   ========================================================= */
+
+/* ----- Per-tier CSS variables ----- */
+:root {
+  /* Default = Principiante (so a tier-less initial paint still
+     renders the brown/walnut look). Each body.tier-* block below
+     overrides these tokens in real-time as the player crosses
+     thresholds; casino.js flips the body class. */
+  --tier-felt:         #2d5e3e;
+  --tier-felt-light:   #3d8056;
+  --tier-felt-dark:    #1a3a26;
+  --tier-felt-shadow:  rgba(0, 0, 0, 0.35);
+  --tier-rail-grad:    linear-gradient(180deg, #5d3a1f 0%, #3a2410 50%, #5d3a1f 100%);
+  --tier-rail-edge:    #1a0d05;
+  --tier-rail-light:   #7a4f29;
+  --tier-floor-tint:   rgba(212, 165, 116, 0.05);
+  --tier-accent:       #d4a574;
+  --tier-accent-glow:  rgba(212, 165, 116, 0.35);
+  --tier-edge-glow:    0 0 24px rgba(212, 165, 116, 0.20);
+  --tier-name-color:   #d4a574;
+  --tier-name-grad:    linear-gradient(180deg, #f5d6a8 0%, #d4a574 100%);
 }
-.menu-header { text-align: center; padding: 18px 0 6px; }
+body.tier-novizio {
+  --tier-felt:         #1f3e6b;
+  --tier-felt-light:   #2c5c95;
+  --tier-felt-dark:    #122642;
+  --tier-felt-shadow:  rgba(0, 0, 0, 0.38);
+  --tier-rail-grad:    linear-gradient(180deg, #c0cdd5 0%, #6a7b87 50%, #c0cdd5 100%);
+  --tier-rail-edge:    #2a3540;
+  --tier-rail-light:   #dde8f0;
+  --tier-floor-tint:   rgba(126, 166, 232, 0.05);
+  --tier-accent:       #7ea6e8;
+  --tier-accent-glow:  rgba(126, 166, 232, 0.45);
+  --tier-edge-glow:    0 0 28px rgba(126, 166, 232, 0.30);
+  --tier-name-color:   #7ea6e8;
+  --tier-name-grad:    linear-gradient(180deg, #cfe0ff 0%, #7ea6e8 100%);
+}
+body.tier-avanzato {
+  --tier-felt:         #6b1f2a;
+  --tier-felt-light:   #8a2a35;
+  --tier-felt-dark:    #3d1018;
+  --tier-felt-shadow:  rgba(0, 0, 0, 0.45);
+  --tier-rail-grad:    linear-gradient(180deg, #6b2818 0%, #3a1a10 50%, #6b2818 100%);
+  --tier-rail-edge:    #150705;
+  --tier-rail-light:   #8a3a25;
+  --tier-floor-tint:   rgba(194, 91, 107, 0.06);
+  --tier-accent:       #c25b6b;
+  --tier-accent-glow:  rgba(194, 91, 107, 0.50);
+  --tier-edge-glow:    0 0 32px rgba(194, 91, 107, 0.34);
+  --tier-name-color:   #c25b6b;
+  --tier-name-grad:    linear-gradient(180deg, #ffd5dc 0%, #c25b6b 100%);
+}
+body.tier-esperto {
+  --tier-felt:         #1a1a1a;
+  --tier-felt-light:   #2e2e2e;
+  --tier-felt-dark:    #050505;
+  --tier-felt-shadow:  rgba(0, 0, 0, 0.55);
+  --tier-rail-grad:    linear-gradient(180deg, #e8c854 0%, #8a6c1e 50%, #e8c854 100%);
+  --tier-rail-edge:    #3a2c08;
+  --tier-rail-light:   #f0d878;
+  --tier-floor-tint:   rgba(212, 175, 55, 0.07);
+  --tier-accent:       #d4af37;
+  --tier-accent-glow:  rgba(212, 175, 55, 0.55);
+  --tier-edge-glow:    0 0 36px rgba(212, 175, 55, 0.40);
+  --tier-name-color:   #d4af37;
+  --tier-name-grad:    linear-gradient(180deg, #ffefb3 0%, #d4af37 100%);
+}
+body.tier-professionale {
+  --tier-felt:         #4a2c80;
+  --tier-felt-light:   #6e4ab8;
+  --tier-felt-dark:    #2c1750;
+  --tier-felt-shadow:  rgba(0, 0, 0, 0.50);
+  --tier-rail-grad:    linear-gradient(180deg, #1a1a1a 0%, #050505 50%, #1a1a1a 100%);
+  --tier-rail-edge:    #b892ff;
+  --tier-rail-light:   #6a4ab0;
+  --tier-floor-tint:   rgba(184, 146, 255, 0.10);
+  --tier-accent:       #b892ff;
+  --tier-accent-glow:  rgba(184, 146, 255, 0.60);
+  --tier-edge-glow:    0 0 40px rgba(184, 146, 255, 0.45);
+  --tier-name-color:   #b892ff;
+  --tier-name-grad:    linear-gradient(180deg, #eadfff 0%, #b892ff 100%);
+}
+
+/* ============== Lobby page chrome ============== */
+#menu {
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px 16px 36px;
+  position: relative;
+  min-height: 100vh;
+}
+/* Per-tier floor gradient — different color per casino, used as the
+   lobby's backdrop. The body.tier-* page background sits behind it
+   but is masked by this radial overlay so #menu looks warmer / themed
+   rather than a flat green field. */
+#menu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+body.tier-principiante  #menu::before { background: radial-gradient(ellipse at 50% 0%, #5b4630 0%, #2a1c12 60%, #150c08 100%); }
+body.tier-novizio       #menu::before { background: radial-gradient(ellipse at 50% 0%, #2a3f70 0%, #0a1230 60%, #050818 100%); }
+body.tier-avanzato      #menu::before { background: radial-gradient(ellipse at 50% 0%, #6b2028 0%, #2a0c12 60%, #150508 100%); }
+body.tier-esperto       #menu::before { background: radial-gradient(ellipse at 50% 0%, #5a4515 0%, #2a1f05 60%, #150e02 100%); }
+body.tier-professionale #menu::before { background: radial-gradient(ellipse at 50% 0%, #3e1660 0%, #150428 60%, #08020f 100%); }
+
+/* Faint "carpet grain" overlay — tile-stripes that count as the
+   casino floor texture. Mix-blend-mode: screen so the dark halls stay
+   dark and only the highlight stripe picks up light. Pure CSS, no
+   asset file. */
+#menu::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0,
+    transparent 60px,
+    var(--tier-floor-tint) 60px,
+    var(--tier-floor-tint) 61px,
+    transparent 61px,
+    transparent 120px
+  );
+  opacity: 0.55;
+  mix-blend-mode: screen;
+}
+
+/* ----- Top bar: title on the left, wallet pill on the right ----- */
+.lobby-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  max-width: 1240px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
+}
+.lobby-topbar-left { display: flex; flex-direction: column; gap: 2px; }
+.lobby-topbar-right { display: flex; align-items: center; gap: 10px; }
 .casino-title {
-  font-size: 48px; font-weight: 900; letter-spacing: 5px;
-  background: linear-gradient(180deg, #ffe27a 0%, #c9a233 60%, #946820 100%);
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  background: var(--tier-name-grad);
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
-  text-shadow: 0 0 30px rgba(255,215,107,0.18);
+  text-shadow: 0 0 30px var(--tier-accent-glow);
+  margin: 0;
+  line-height: 1;
 }
-.casino-subtitle { color: var(--text-dim); font-size: 13px; letter-spacing: 1px; margin-top: 4px; }
+.casino-subtitle {
+  color: var(--text-dim);
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin: 4px 0 0;
+  font-style: italic;
+  text-transform: uppercase;
+}
 
-.wallet-panel {
-  margin: 14px auto 22px;
-  background: linear-gradient(180deg, #15291c 0%, #0d1c12 100%);
-  border: 1px solid #1f3a26;
-  border-radius: 14px;
-  padding: 14px 18px 12px;
-  width: 100%; max-width: 580px;
-  display: flex; flex-direction: column; gap: 6px;
+/* ---- Wallet HUD pill (consolidated bankroll + meta) ---- */
+.wallet-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.60), rgba(0, 0, 0, 0.35));
+  border: 1px solid var(--tier-accent);
+  border-radius: 999px;
+  box-shadow: var(--tier-edge-glow), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
 }
-.wallet-label {
-  font-size: 11px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase;
+.wallet-pill-label {
+  color: var(--tier-accent);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
 }
-.wallet-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
 .wallet-amount {
-  font-size: 36px; font-weight: 900; color: var(--gold);
-  text-shadow: 0 0 14px rgba(255,215,107,0.22);
+  font-size: 22px;
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 0 12px var(--tier-accent-glow);
   transition: all 0.2s;
+  letter-spacing: 0.5px;
+  line-height: 1;
 }
-.wallet-buttons { display: flex; gap: 8px; }
+.wallet-pill-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.wallet-pill-meta {
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+/* Keep the small reset button styled even though the old .wallet-panel
+   wrapper is gone — JS still binds #resetWalletBtn. */
 .chip-btn {
-  background: linear-gradient(180deg, #1f5a36 0%, #154528 100%);
-  color: var(--gold);
-  border: 1px solid #2a4531;
-  padding: 8px 14px; border-radius: 10px;
-  cursor: pointer; font-weight: 700; font-size: 14px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.30));
+  color: var(--tier-accent);
+  border: 1px solid var(--tier-accent);
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
   transition: all 0.15s;
 }
-.chip-btn.small { padding: 6px 10px; font-size: 12px; }
-.chip-btn:hover { background: linear-gradient(180deg, #287b48 0%, #1a5530 100%); transform: translateY(-1px); }
-.wallet-meta { font-size: 12px; color: var(--text-dim); }
+.chip-btn.small { padding: 6px 12px; font-size: 12px; }
+.chip-btn:hover {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.45));
+  transform: translateY(-1px);
+  box-shadow: var(--tier-edge-glow);
+}
 
-.game-cards {
+/* ============== Tier showcase as a horizontal ribbon ============== */
+.tier-showcase {
+  margin: 0 auto 20px;
+  width: 100%;
+  max-width: 1240px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.30) 100%);
+  border: 1px solid var(--tier-accent);
+  border-radius: 14px;
+  padding: 14px 36px 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px;
-  width: 100%; max-width: 880px;
-  margin-top: 4px;
+  grid-template-columns: 1fr minmax(240px, auto);
+  gap: 18px 24px;
+  align-items: center;
+  box-shadow: var(--tier-edge-glow), 0 10px 28px rgba(0, 0, 0, 0.45);
+  position: relative;
+  z-index: 2;
 }
-.game-card {
-  background: linear-gradient(180deg, #1a2e22 0%, #0d1c12 100%);
-  border: 1px solid #2a4531;
-  border-radius: 16px;
-  padding: 28px 18px 22px;
-  color: var(--text);
-  font-size: 14px;
-  cursor: pointer;
-  text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  transition: all 0.2s ease;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+.floor-decal-corner {
+  position: absolute;
+  color: var(--tier-accent);
+  font-size: 16px;
+  text-shadow: 0 0 8px var(--tier-accent-glow);
+  pointer-events: none;
 }
-.game-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  border-color: var(--gold-dark);
-  box-shadow: 0 14px 32px rgba(0,0,0,0.5), 0 0 30px rgba(255,215,107,0.18);
+.floor-decal-corner-tl { top: -2px;    left: 14px;  }
+.floor-decal-corner-tr { top: -2px;    right: 14px; }
+.floor-decal-corner-bl { bottom: -2px; left: 14px;  }
+.floor-decal-corner-br { bottom: -2px; right: 14px; }
+.tier-showcase-crest {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--tier-accent);
+  margin: 0;
+  font-weight: 800;
 }
-.game-card-icon {
-  font-size: 56px; line-height: 1;
-  background: linear-gradient(180deg, #ffe27a 0%, #c9a233 100%);
+.tier-showcase-name {
+  font-size: 28px;
+  font-weight: 900;
+  margin: 4px 0 2px;
+  background: var(--tier-name-grad);
   -webkit-background-clip: text; background-clip: text; color: transparent;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
 }
-.game-card-name { font-size: 22px; font-weight: 800; color: var(--gold); letter-spacing: 0.5px; }
-.game-card-tagline { font-size: 13px; color: var(--text); }
-.game-card-meta { font-size: 11px; color: var(--text-dim); letter-spacing: 0.5px; }
-.game-card--poker .game-card-icon     { color: #1a4a30; background: linear-gradient(180deg, #a8e7c5 0%, #ffd76b 100%); -webkit-background-clip: text; background-clip: text; }
-.game-card--blackjack .game-card-icon { color: #1a1a1a; background: linear-gradient(180deg, #ffd8b3 0%, #ffd76b 100%); -webkit-background-clip: text; background-clip: text; }
-.game-card--roulette .game-card-icon  { color: #1a3a1f; background: linear-gradient(180deg, #c0392b 0%, #ffd76b 100%); -webkit-background-clip: text; background-clip: text; }
+.tier-showcase-sub {
+  color: var(--text);
+  font-size: 13px;
+  margin: 0 0 4px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.tier-showcase-rule {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin: 0;
+  line-height: 1.4;
+}
 
-.menu-footer { text-align: center; color: var(--text-dim); margin-top: 36px; }
-.menu-footer code { background: #0e1a12; padding: 1px 6px; border-radius: 4px; color: var(--gold); }
+/* Tier badge inside the showcase: vertical, on the right */
+.tier-badge {
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.50), rgba(0, 0, 0, 0.25));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  padding: 8px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 240px;
+  align-self: stretch;
+  justify-content: center;
+}
+.tier-badge-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.tier-badge-name { font-weight: 800; font-size: 13px; color: var(--tier-name-color); letter-spacing: 0.3px; }
+.tier-badge-peak { font-size: 11px; color: var(--text-dim); }
+.tier-badge-progress { font-size: 11px; color: var(--text-dim); letter-spacing: 0.3px; }
+.tier-badge-bar-wrap {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.tier-badge-bar {
+  height: 100%; width: 0;
+  background: var(--tier-name-grad);
+  transition: width 0.6s ease;
+  border-radius: 999px;
+}
+.tier-badge--principiante .tier-badge-name { color: var(--tier-name-color); }
+.tier-badge--novizio       .tier-badge-name { color: var(--tier-name-color); }
+.tier-badge--avanzato      .tier-badge-name { color: var(--tier-name-color); }
+.tier-badge--esperto       .tier-badge-name { color: var(--tier-name-color); }
+.tier-badge--professionale .tier-badge-name { color: var(--tier-name-color); }
+
+/* ============== Tables row ============== */
+.tables-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  width: 100%;
+  max-width: 1240px;
+  margin-top: 4px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ----- Card shell (still <button>) ----- */
+.table-card {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text);
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+.table-card:hover { transform: translateY(-6px); }
+.table-card:focus-visible { outline: none; }
+.table-card:focus-visible .table-frame {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 0 0 3px var(--tier-accent),
+    0 20px 44px rgba(0, 0, 0, 0.6),
+    var(--tier-edge-glow);
+}
+
+/* ----- The frame: wood/metal rail around the felt ----- */
+.table-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.6 / 1;
+  /* Fallback for browsers without aspect-ratio (Safari < 15, old Edge):
+     guarantee the frame never collapses to zero height. */
+  min-height: 200px;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--tier-rail-grad);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--tier-rail-edge),
+    0 14px 32px rgba(0, 0, 0, 0.55),
+    var(--tier-edge-glow);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.table-frame::before {
+  /* Wood-grain / metal-sheen highlight: a thin 8% wide band on the
+     left edge that picks up a brighter rail-light tone. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background-image: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 6%,
+    transparent 94%,
+    rgba(255, 255, 255, 0.08) 100%);
+  pointer-events: none;
+}
+
+/* Inner padded rail border ("the lip" between the wood and the felt) */
+.table-rail {
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  background: var(--tier-rail-grad);
+  padding: 6px;
+  position: relative;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* The felt itself */
+.table-felt {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background: radial-gradient(circle at 50% 50%,
+    var(--tier-felt-light) 0%,
+    var(--tier-felt) 60%,
+    var(--tier-felt-dark) 100%);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 28px var(--tier-felt-shadow),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+
+/* =========================================================
+   TEXAS HOLD'EM — racetrack oval
+   Real Hold'em tables have:
+     - racetrack-shaped felt (oval w/ flat sides)
+     - a printed "BETTING LINE" dashed arc inside the felt
+     - 6–8 seat positions around the rim
+     - a small white dealer-button disc
+     - a community-cards area in the middle
+   ========================================================= */
+.table-felt--holdem {
+  border-radius: 50% / 35%;
+  border: 1.5px dashed rgba(212, 175, 55, 0.22);
+}
+.table-felt--holdem::before {
+  /* Inner "BETTING LINE" printed arc (slightly inset) */
+  content: '';
+  position: absolute;
+  inset: 14% 10%;
+  border: 1px solid rgba(212, 175, 55, 0.12);
+  border-radius: 50% / 35%;
+  pointer-events: none;
+}
+.holdem-positions {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.holdem-seat {
+  position: absolute;
+  width: 8%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(212, 175, 55, 0.30);
+  transform: translate(-50%, -50%);
+  transition: box-shadow 0.25s ease;
+}
+.holdem-seat.seat-1 { left: 50%;  top: 8%;   }
+.holdem-seat.seat-2 { left: 82%;  top: 26%;  }
+.holdem-seat.seat-3 { left: 92%;  top: 62%;  }
+.holdem-seat.seat-4 { left: 50%;  top: 92%;  }
+.holdem-seat.seat-5 { left: 8%;   top: 62%;  }
+.holdem-seat.seat-6 { left: 18%;  top: 26%;  }
+.holdem-dealer-btn {
+  /* Real tables have a small white disc marking the dealer;
+     sits next to seat-6 by convention (we draw it over seat-1 so it
+     always reads as visible in our static preview). */
+  position: absolute;
+  left: 50%; top: 8%;
+  transform: translate(-50%, -50%);
+  width: 5%;
+  aspect-ratio: 1;
+  background: white;
+  color: black;
+  border: 1px solid #1a1a1a;
+  border-radius: 50%;
+  font-weight: 900;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.holdem-community {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 4px;
+}
+.holdem-card-flip {
+  display: block;
+  width: 18px;
+  height: 24px;
+  background:
+    repeating-linear-gradient(135deg, #b9a06a 0, #b9a06a 3px, #8a6e1e 3px, #8a6e1e 6px);
+  border: 1px solid #6b5316;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transform-origin: top center;
+}
+.holdem-pot-marker {
+  position: absolute;
+  left: 50%; top: 70%;
+  transform: translate(-50%, -50%);
+  color: rgba(212, 175, 55, 0.55);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+.holdem-corner-mark {
+  position: absolute;
+  left: 12%; top: 14%;
+  font-size: 22px;
+  font-weight: 900;
+  color: rgba(212, 175, 55, 0.20);
+  pointer-events: none;
+}
+.holdem-corner-mark.cm-br {
+  left: auto; top: auto;
+  right: 12%; bottom: 14%;
+}
+
+/* =========================================================
+   BLACKJACK — kidney / semicircle
+   Real BJ tables have:
+     - a half-moon / kidney shape (curved on the player side)
+     - dealer position on the flat side, with a printed name plate
+     - 3 to 7 betting spots inside, each a printed circle
+     - "BLACKJACK PAYS 3 TO 2" strip near the dealer
+     - "INSURANCE PAYS 2 TO 1" + "DEALER MUST HIT SOFT 17" rule strip
+   ========================================================= */
+.table-felt--blackjack {
+  /* Asymmetric border-radius approximates the player-side arc */
+  border-radius: 48% 48% 220px 220px / 36% 36% 220px 220px;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+}
+.bj-dealer-strip {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--tier-accent);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  white-space: nowrap;
+}
+.bj-dealer-cards {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+}
+.bj-mini-card {
+  display: block;
+  width: 16px;
+  height: 22px;
+  background:
+    repeating-linear-gradient(45deg, #6c1a1a 0, #6c1a1a 3px, #4a0f0f 3px, #4a0f0f 6px);
+  border: 1px solid #2a0808;
+  border-radius: 2px;
+}
+.bj-bet-spots {
+  position: absolute;
+  bottom: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 14px;
+}
+.bj-spot {
+  position: relative;
+  width: 30px;
+  aspect-ratio: 1;
+  border: 1px dashed rgba(255, 255, 255, 0.40);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bj-spot-chip {
+  width: 12px;
+  height: 12px;
+  background: var(--tier-accent);
+  border-radius: 50%;
+  border: 2px dashed var(--tier-rail-edge);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.bj-insurance-strip {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   ROULETTE — rectangle + wheel + grid
+   Real roulette tables have:
+     - a long rectangular layout with the wheel on one end
+     - the betting grid (numbers 0–36 + outside bets) on the other end
+     - a wood-and-brass wheel with red/black/green-numbered pockets
+   We model: 38% wheel on the left, 62% number-grid on the right,
+   plus a 4-cell corner-bet stack in the bottom-right.
+   ========================================================= */
+.table-felt--roulette {
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 36% 1fr;
+  align-items: stretch;
+  padding: 6px;
+  gap: 8px;
+}
+.rou-mini-wheel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.62);
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rou-mini-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  border: 4px solid;
+  border-color: var(--tier-rail-light) var(--tier-rail-edge) var(--tier-rail-edge) var(--tier-rail-light);
+  pointer-events: none;
+  z-index: 4;
+}
+.rou-mini-conic {
+  /* 20 alternating wedges around a deep dark disk. 0.5deg gaps + 0.4px
+     blur smooth jagged edges on iOS Safari. */
+  position: absolute;
+  inset: 9%;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      from -90deg,
+      #c0392b 0deg 17.5deg,
+      #1a1a1a 18deg 35.5deg,
+      #c0392b 36deg 53.5deg,
+      #1a1a1a 54deg 71.5deg,
+      #c0392b 72deg 89.5deg,
+      #1a1a1a 90deg 107.5deg,
+      #c0392b 108deg 125.5deg,
+      #1a1a1a 126deg 143.5deg,
+      #c0392b 144deg 161.5deg,
+      #1a1a1a 162deg 179.5deg,
+      #c0392b 180deg 197.5deg,
+      #1a1a1a 198deg 215.5deg,
+      #27ae60 216deg 233.5deg,
+      #1a1a1a 234deg 251.5deg,
+      #c0392b 252deg 269.5deg,
+      #1a1a1a 270deg 287.5deg,
+      #c0392b 288deg 305.5deg,
+      #1a1a1a 306deg 323.5deg,
+      #c0392b 324deg 341.5deg,
+      #1a1a1a 342deg 359.5deg
+    );
+  filter: blur(0.4px);
+  pointer-events: none;
+  z-index: 2;
+}
+.rou-mini-hub {
+  position: absolute;
+  inset: 38%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--tier-rail-light) 0%, var(--tier-rail-edge) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.6), 0 0 4px rgba(0, 0, 0, 0.4);
+  z-index: 3;
+}
+.rou-mini-turret {
+  position: absolute;
+  inset: 46%;
+  border-radius: 50%;
+  background: var(--tier-accent);
+  box-shadow: 0 0 6px var(--tier-accent-glow);
+  z-index: 4;
+  transition: box-shadow 0.2s ease;
+}
+
+.rou-grid-strip {
+  display: grid;
+  grid-template-columns: repeat(19, 1fr);
+  grid-template-rows: 1fr;
+  gap: 1px;
+  align-self: stretch;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  padding: 5px 4px;
+  position: relative;
+  overflow: hidden;
+}
+.rou-grid-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+  border-radius: 1px;
+  height: 100%;
+  transition: filter 0.15s ease;
+}
+.rou-grid-cell.zero  { background: #27ae60; }
+.rou-grid-cell.red   { background: #c0392b; }
+.rou-grid-cell.black { background: #1a1a1a; }
+
+/* Corner-bet stack (4 small cells hint at the "outside corner" bets) */
+.rou-corner-stack {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  border-radius: 2px;
+  overflow: hidden;
+  z-index: 3;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+.rou-corner-cell { display: block; }
+.rou-corner-cell.red   { background: #c0392b; }
+.rou-corner-cell.black { background: #1a1a1a; }
+
+/* ============== Game card labels (under the table) ============== */
+.game-card-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--tier-name-color);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  text-shadow: 0 0 14px var(--tier-accent-glow);
+}
+.game-card-tagline {
+  font-size: 12px;
+  color: var(--text);
+  letter-spacing: 0.3px;
+  margin: 0;
+  opacity: 0.85;
+}
+.game-card-meta {
+  font-size: 10.5px;
+  color: var(--tier-accent);
+  letter-spacing: 1px;
+  font-weight: 700;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* =========================================================
+   HOVER EFFECTS — small gameplay-feel previews per game
+   ========================================================= */
+/* Hold'em: deal-in animation on the community cards + dealer
+   button rotates one seat. */
+.table-card--poker:hover .holdem-card-flip {
+  animation: holdemDeal 0.7s ease-out both;
+}
+.table-card--poker:hover .holdem-card-flip:nth-child(2) { animation-delay: 0.12s; }
+.table-card--poker:hover .holdem-card-flip:nth-child(3) { animation-delay: 0.24s; }
+@keyframes holdemDeal {
+  0%   { transform: translateY(-12px) rotate(-10deg); opacity: 0; }
+  100% { transform: translateY(0)    rotate(0);     opacity: 1; }
+}
+.table-card--poker:hover .holdem-seat {
+  box-shadow: 0 0 6px var(--tier-accent-glow);
+}
+.table-card--poker:hover .holdem-dealer-btn {
+  animation: dealerSpin 0.9s ease-out both;
+}
+@keyframes dealerSpin {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(36deg); }
+}
+.table-card--poker:hover .table-frame {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--tier-accent),
+    0 22px 50px rgba(0, 0, 0, 0.65),
+    0 0 38px var(--tier-accent-glow);
+}
+
+/* Blackjack: subtle perspective tilt, betting spots pulse,
+   dealer's hole cards flip in. */
+.table-card--blackjack:hover .table-frame {
+  transform: perspective(900px) rotateX(4deg) translateY(-2px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--tier-accent),
+    0 22px 50px rgba(0, 0, 0, 0.65),
+    0 0 38px var(--tier-accent-glow);
+}
+.table-card--blackjack:hover .bj-bet-spots {
+  animation: bjBetPulse 1.2s ease-in-out infinite;
+}
+@keyframes bjBetPulse {
+  0%, 100% { filter: none; }
+  50%      { filter: brightness(1.30) drop-shadow(0 0 6px var(--tier-accent-glow)); }
+}
+.table-card--blackjack:hover .bj-mini-card:nth-child(1) {
+  animation: bjCardDeal 0.55s ease-out both;
+}
+.table-card--blackjack:hover .bj-mini-card:nth-child(2) {
+  animation: bjCardDeal 0.55s 0.18s ease-out both;
+}
+@keyframes bjCardDeal {
+  0%   { transform: translateY(-10px) rotate(-12deg); opacity: 0; }
+  100% { transform: translateY(0)     rotate(0);     opacity: 1; }
+}
+
+/* Roulette: preview the wheel spin + win-pocket glow */
+.table-card--roulette:hover .rou-mini-conic {
+  animation: rouWheelSpin 1.4s ease-out;
+}
+@keyframes rouWheelSpin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.table-card--roulette:hover .rou-mini-turret {
+  animation: rouBallGlow 1.4s ease-out;
+}
+@keyframes rouBallGlow {
+  0%   { box-shadow: 0 0 6px var(--tier-accent-glow); }
+  100% { box-shadow: 0 0 18px var(--tier-accent), 0 0 6px var(--tier-accent-glow); }
+}
+.table-card--roulette:hover .table-frame {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--tier-accent),
+    0 22px 50px rgba(0, 0, 0, 0.65),
+    0 0 38px var(--tier-accent-glow);
+}
+
+/* ============== Footer ============== */
+.menu-footer {
+  text-align: center;
+  color: var(--text-dim);
+  margin-top: 32px;
+  position: relative;
+  z-index: 2;
+}
+.menu-footer code {
+  background: #0e1a12;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--gold);
+}
+
+/* ============== Responsive — tablet and phone ============== */
+@media (max-width: 1024px) {
+  .lobby-topbar { flex-wrap: wrap; }
+  .tables-row {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+  .tier-showcase {
+    grid-template-columns: 1fr;
+  }
+  .tier-badge {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+@media (max-width: 640px) {
+  .casino-title { font-size: 30px; letter-spacing: 3px; }
+  .casino-subtitle { font-size: 10px; letter-spacing: 1.5px; }
+  .wallet-pill { padding: 6px 10px; height: auto; }
+  .wallet-amount { font-size: 18px; }
+  .wallet-pill-divider,
+  .wallet-pill-meta { display: none; }
+  .table-frame { aspect-ratio: 1.8 / 1; }
+  .tier-showcase { padding: 14px 24px 14px; }
+  .floor-decal-corner { font-size: 13px; }
+  .rou-grid-cell { font-size: 6.5px; }
+}
 
 /* ============== Shared game top bar ============== */
 .game-top-bar {
@@ -1420,18 +2245,12 @@ body.tier-avanzato      .game-top-bar { background: linear-gradient(90deg, rgba(
 body.tier-esperto       .game-top-bar { background: linear-gradient(90deg, rgba(212,175,55,0.16), rgba(40,28,8,0.45)   50%, rgba(212,175,55,0.16)); border-bottom-color: #4d3a10; }
 body.tier-professionale .game-top-bar { background: linear-gradient(90deg, rgba(184,146,255,0.18), rgba(30,10,55,0.50) 50%, rgba(184,146,255,0.18)); border-bottom-color: #2c0e4a; }
 
-/* Wallet panel uses tier accent for the amount glow */
-body.tier-principiante  .wallet-amount { text-shadow: 0 0 16px rgba(212,165,116,0.30); }
-body.tier-novizio       .wallet-amount { text-shadow: 0 0 16px rgba(126,166,232,0.35); }
-body.tier-avanzato      .wallet-amount { text-shadow: 0 0 16px rgba(194,91,107,0.35); }
-body.tier-esperto       .wallet-amount { text-shadow: 0 0 18px rgba(212,175,55,0.42); }
-body.tier-professionale .wallet-amount { text-shadow: 0 0 22px rgba(184,146,255,0.50); }
-
-/* Casino title changes color per tier */
-body.tier-novizio       .casino-title { background: linear-gradient(180deg, #cfe0ff 0%, #7ea6e8 50%, #382c8c 100%); -webkit-background-clip: text; background-clip: text; }
-body.tier-avanzato      .casino-title { background: linear-gradient(180deg, #ffd5dc 0%, #c25b6b 50%, #4d1822 100%); -webkit-background-clip: text; background-clip: text; }
-body.tier-esperto       .casino-title { background: linear-gradient(180deg, #ffefb3 0%, #d4af37 50%, #6d4f0a 100%); -webkit-background-clip: text; background-clip: text; }
-body.tier-professionale .casino-title { background: linear-gradient(180deg, #eadfff 0%, #b892ff 50%, #4a2c80 100%); -webkit-background-clip: text; background-clip: text; }
+/* Wallet HUD amount glow + casino-title gradient are now driven by
+   the per-tier --tier-accent-glow / --tier-name-grad CSS variables
+   defined in the new lobby CSS block above. The explicit per-tier
+   rules that used to live here were deleted so the var approach isn't
+   overridden on cascade. KEEP the body.tier-X page-background +
+   game-top-bar rules below — those still affect non-lobby screens. */
 
 /* ============== Tier badge ============== */
 .tier-badge {
@@ -1503,15 +2322,10 @@ body.tier-professionale .casino-title { background: linear-gradient(180deg, #ead
   line-height: 1.4;
 }
 
-.tier-badge--principiante .tier-badge-name { color: #d4a574; }
-.tier-badge--novizio       .tier-badge-name { color: #9bb8ec; }
-.tier-badge--novizio       .tier-badge-bar  { background: linear-gradient(90deg, #4a72c0, #9bb8ec); }
-.tier-badge--avanzato      .tier-badge-name { color: #d97a87; }
-.tier-badge--avanzato      .tier-badge-bar  { background: linear-gradient(90deg, #6b1a26, #d97a87); }
-.tier-badge--esperto       .tier-badge-name { color: #d4af37; }
-.tier-badge--esperto       .tier-badge-bar  { background: linear-gradient(90deg, #6d4f0a, #d4af37); }
-.tier-badge--professionale .tier-badge-name { color: #c4a8ff; }
-.tier-badge--professionale .tier-badge-bar  { background: linear-gradient(90deg, #4a2c80, #c4a8ff); }
+/* Tier badge name color + progress bar gradient are now driven by
+   --tier-name-color / --tier-name-grad (set per body.tier-X). The
+   hardcoded per-tier rules above were replaced with var-driven
+   defaults at the lobby CSS section. */
 
 /* ============== Tier-up overlay ============== */
 .tier-up { z-index: 150; }

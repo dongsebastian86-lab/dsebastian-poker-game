@@ -6,70 +6,171 @@
   <title>Casino — Poker · Blackjack · Roulette</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="tier-principiante">
 
-  <!-- =================== CASINO MENU =================== -->
+  <!-- =================== CASINO LOBBY ===================
+       Redesigned as a top-down "casino floor" view. The wallet HUD and
+       tier-showcase that used to be separate panels above the game cards
+       are now absorbed into a unified top-bar + floor-decal ribbon, with
+       the three real-world-modeled tables (Hold'em racetrack, Blackjack
+       kidney, Roulette layout) sitting in their own row beneath. Hover
+       each table to preview its gameplay feel.
+
+       DOM hooks preserved for casino.js:
+         #walletAmount, #walletStats, #resetWalletBtn
+         #tierBadge (with .tier-badge-row, .tier-badge-name, .tier-badge-peak,
+                     .tier-badge-progress, .tier-badge-bar-wrap, .tier-badge-bar)
+         .tier-showcase (with .tier-showcase-name, .tier-showcase-sub,
+                         .tier-showcase-rule)
+         .game-card[data-game="poker|blackjack|roulette"] (click handler)
+  ========================================================== -->
   <div id="menu" class="screen active">
-    <header class="menu-header">
-      <h1 class="casino-title">♠♥♦♣ CASINO ROYALE</h1>
-      <p class="casino-subtitle">Pick your table. The house is watching.</p>
+    <!-- Top bar: title on the left, wallet pill on the right. The wallet
+         becomes a single HUD pill rather than a tall panel, so it doesn't
+         compete with the tables for vertical space. -->
+    <header class="lobby-topbar">
+      <div class="lobby-topbar-left">
+        <h1 class="casino-title">♠♥♦♣ CASINO ROYALE</h1>
+        <p class="casino-subtitle">Three tables. One legendary night.</p>
+      </div>
+      <div class="lobby-topbar-right">
+        <div class="wallet-pill">
+          <span class="wallet-pill-label">♠ BANKROLL</span>
+          <span class="wallet-amount" id="walletAmount">250</span>
+          <span class="wallet-pill-divider"></span>
+          <span id="walletStats" class="wallet-pill-meta">Hands 0 · Net 0</span>
+        </div>
+        <button class="chip-btn small" id="resetWalletBtn" title="Reset bankroll and casino progress">↻ Reset</button>
+      </div>
     </header>
 
-    <section class="wallet-panel">
-      <div class="wallet-label">YOUR BANKROLL</div>
-      <div class="wallet-row">
-        <div class="wallet-amount" id="walletAmount">1,000</div>
-        <div class="wallet-buttons">
-          <button class="chip-btn small" id="resetWalletBtn">Reset</button>
-        </div>
-      </div>
-      <div class="wallet-meta">
-        <span id="walletStats">Hands played: 0 · Net: 0</span>
-      </div>
+    <!-- Floor-decal ribbon: tier showcase on the left, tier-edge tier badge
+         on the right. Acts as the "name plate" above the casino floor -->
+    <section class="tier-showcase">
+      <span class="floor-decal-corner floor-decal-corner-tl" aria-hidden="true">✦</span>
+      <span class="floor-decal-corner floor-decal-corner-tr" aria-hidden="true">✦</span>
+      <span class="floor-decal-corner floor-decal-corner-bl" aria-hidden="true">✦</span>
+      <span class="floor-decal-corner floor-decal-corner-br" aria-hidden="true">✦</span>
+
+      <div class="tier-showcase-crest">YOUR CURRENT CASINO</div>
+      <h2 class="tier-showcase-name">Caffè del Gioco</h2>
+      <p class="tier-showcase-sub">Principiante</p>
+      <p class="tier-showcase-rule">Minimum bets 5 · AI plays at 1.00× skill</p>
+
       <div id="tierBadge" class="tier-badge tier-badge--principiante">
         <div class="tier-badge-row">
           <span class="tier-badge-name">✦ Caffè del Gioco</span>
-          <span class="tier-badge-peak">Peak: 1,000</span>
+          <span class="tier-badge-peak">Peak: 250</span>
         </div>
         <div class="tier-badge-progress">Next: Casino della Stella</div>
         <div class="tier-badge-bar-wrap"><div class="tier-badge-bar"></div></div>
       </div>
     </section>
 
-    <section class="game-cards">
-      <button class="game-card game-card--poker" data-game="poker">
-        <div class="game-card-icon">♠</div>
+    <!-- Three casino tables side-by-side. Each card is a top-down CSS view
+         of the real game table — racetrack oval for Hold'em, kidney for
+         Blackjack, full rectangle-with-wheel for Roulette. -->
+    <section class="tables-row">
+      <!-- ============ TEXAS HOLD'EM (racetrack oval) ============ -->
+      <button class="game-card game-card--poker table-card" data-game="poker">
+        <div class="table-frame">
+          <div class="table-rail">
+            <div class="table-felt table-felt--holdem">
+              <div class="holdem-positions">
+                <span class="holdem-seat seat-1" aria-label="seat 1"></span>
+                <span class="holdem-seat seat-2" aria-label="seat 2"></span>
+                <span class="holdem-seat seat-3" aria-label="seat 3"></span>
+                <span class="holdem-seat seat-4" aria-label="seat 4"></span>
+                <span class="holdem-seat seat-5" aria-label="seat 5"></span>
+                <span class="holdem-seat seat-6" aria-label="seat 6"></span>
+                <span class="holdem-dealer-btn" aria-label="dealer button">D</span>
+              </div>
+              <div class="holdem-bet-line" aria-hidden="true"></div>
+              <div class="holdem-community">
+                <span class="holdem-card-flip"></span>
+                <span class="holdem-card-flip"></span>
+                <span class="holdem-card-flip"></span>
+              </div>
+              <div class="holdem-pot-marker">POT</div>
+              <div class="holdem-corner-mark" aria-hidden="true">♠</div>
+              <div class="holdem-corner-mark cm-br" aria-hidden="true">♦</div>
+            </div>
+          </div>
+        </div>
         <div class="game-card-name">Texas Hold'em</div>
-        <div class="game-card-tagline">No-limit · Multiplayer</div>
-        <div class="game-card-meta">vs Bots · Hot-Seat</div>
+        <div class="game-card-tagline">No-limit · up to 7 seats</div>
+        <div class="game-card-meta">vs Bots · Hot-Seat · Blinds 5/10 →</div>
       </button>
 
-      <button class="game-card game-card--blackjack" data-game="blackjack">
-        <div class="game-card-icon">21</div>
+      <!-- ============ BLACKJACK (kidney / semicircle) ============ -->
+      <button class="game-card game-card--blackjack table-card" data-game="blackjack">
+        <div class="table-frame">
+          <div class="table-rail">
+            <div class="table-felt table-felt--blackjack">
+              <div class="bj-dealer-strip">DEALER · BLACKJACK PAYS 3 TO 2</div>
+              <div class="bj-dealer-cards">
+                <span class="bj-mini-card back"></span>
+                <span class="bj-mini-card back"></span>
+              </div>
+              <div class="bj-bet-spots">
+                <span class="bj-spot with-chip"><span class="bj-spot-chip"></span></span>
+                <span class="bj-spot"></span>
+                <span class="bj-spot"></span>
+              </div>
+              <div class="bj-insurance-strip">INSURANCE PAYS 2 TO 1 · DEALER MUST HIT SOFT 17</div>
+            </div>
+          </div>
+        </div>
         <div class="game-card-name">Blackjack</div>
         <div class="game-card-tagline">Beat the dealer to 21</div>
-        <div class="game-card-meta">vs Bots · Hot-Seat</div>
+        <div class="game-card-meta">vs Bots · Hot-Seat · Min bet 10 →</div>
       </button>
 
-      <button class="game-card game-card--roulette" data-game="roulette">
-        <div class="game-card-icon">◉</div>
+      <!-- ============ ROULETTE (rectangle + wheel + grid) ============ -->
+      <button class="game-card game-card--roulette table-card" data-game="roulette">
+        <div class="table-frame">
+          <div class="table-rail">
+            <div class="table-felt table-felt--roulette">
+              <div class="rou-mini-wheel">
+                <div class="rou-mini-rim"></div>
+                <div class="rou-mini-conic" aria-hidden="true"></div>
+                <div class="rou-mini-hub"></div>
+                <div class="rou-mini-turret"></div>
+              </div>
+              <div class="rou-grid-strip" aria-hidden="true">
+                <span class="rou-grid-cell zero">0</span>
+                <span class="rou-grid-cell red">3</span>
+                <span class="rou-grid-cell black">2</span>
+                <span class="rou-grid-cell red">1</span>
+                <span class="rou-grid-cell red">6</span>
+                <span class="rou-grid-cell black">5</span>
+                <span class="rou-grid-cell red">4</span>
+                <span class="rou-grid-cell black">9</span>
+                <span class="rou-grid-cell red">8</span>
+                <span class="rou-grid-cell black">7</span>
+                <span class="rou-grid-cell black">12</span>
+                <span class="rou-grid-cell red">11</span>
+                <span class="rou-grid-cell black">10</span>
+                <span class="rou-grid-cell black">15</span>
+                <span class="rou-grid-cell red">14</span>
+                <span class="rou-grid-cell black">13</span>
+                <span class="rou-grid-cell red">18</span>
+                <span class="rou-grid-cell black">17</span>
+                <span class="rou-grid-cell red">16</span>
+              </div>
+              <div class="rou-corner-stack">
+                <span class="rou-corner-cell red"></span>
+                <span class="rou-corner-cell black"></span>
+                <span class="rou-corner-cell red"></span>
+                <span class="rou-corner-cell black"></span>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="game-card-name">Roulette</div>
-        <div class="game-card-tagline">European wheel · 0–36</div>
-        <div class="game-card-meta">vs Bots (spectators)</div>
+        <div class="game-card-tagline">European wheel · Single zero</div>
+        <div class="game-card-meta">Spectator bots · All in one spin →</div>
       </button>
-    </section>
-
-    <!-- ============= Static tier showcase (lives in the casino menu's
-         empty green space — never visible inside any game screen). The
-         dynamic tier-up modal (#tierUpOverlay) remains hidden by default
-         and only appears as a popup when the player crosses a tier
-         threshold. ============= -->
-    <section class="tier-showcase">
-      <div class="tier-showcase-stars">✦ ✦ ✦</div>
-      <div class="tier-showcase-crest">YOUR CURRENT CASINO</div>
-      <h2 class="tier-showcase-name">Caffè del Gioco</h2>
-      <p class="tier-showcase-sub">Principiante</p>
-      <p class="tier-showcase-rule">Minimum bets 5 · AI plays at 1.00× skill</p>
     </section>
 
     <footer class="menu-footer">
