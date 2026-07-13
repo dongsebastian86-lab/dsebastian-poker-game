@@ -92,17 +92,25 @@ poker-game/
 
 ## 🤖 AI-Assisted Development
 
-This project was built with the assistance of **AI coding tools**
-(via [Freebuff](https://freebuff.com) — specifically the **Buffy**
-coding agent). Specifically:
+This repository was deployed to GitHub with the assistance of
+**AI coding tools** via [Freebuff](https://freebuff.com) — specifically
+the **Buffy** coding agent.
 
-- **Buffy** assisted with project review, Git/GitHub workflow
-  guidance, README and LICENSE authoring, and explanatory documentation
-  throughout the build.
-- **All game logic, UI design, hand evaluators, animations, audio
-  synthesis, tier-progression rules, and game-balance decisions**
-  were written by the human author working alongside AI pair-programming
-  via Freebuff.
+In this build session, Buffy assisted with:
+
+- Reviewing the existing casino codebase and explaining how it works
+- Walking through the `git` / `gh` / GitHub setup
+- Authoring this `README.md` and the `LICENSE` file
+- Crafting the commit messages
+
+The **casino game code itself** — `casino.js`, `poker.js`,
+`blackjack.js`, `roulette.js`, `index.html`, and `style.css` —
+was authored by the human project owner.
+
+> Earlier sessions of this project may have used AI tooling as well;
+> that history is not recorded in this README. The credit above
+> covers only the assisted-versus-human split verifiable from this
+> repository's commit log and conversation history.
 
 ---
 
@@ -124,7 +132,7 @@ standard, browser-native APIs:
 
 | Game | Reference |
 |---|---|
-| **Texas Hold'em** | Standard no-limit rules; hand rankings follow the canonical 9-tier poker hierarchy (Royal Flush → High Card) as published by the [WSOP](https://www.wsop.com/poker-hands/) and Roger Hughson. |
+| **Texas Hold'em** | Standard no-limit rules; hand rankings follow the canonical 9-tier poker hierarchy (Royal Flush → High Card) as published by the [WSOP](https://www.wsop.com/poker-hands/). |
 | **Blackjack** | "Dealer stands on all 17s" (S17 rule). Bot strategy approximates the basic-strategy table as originally analysed by [Edward O. Thorp](https://en.wikipedia.org/wiki/Edward_O._Thorp) in *Beat the Dealer* (1962). |
 | **Roulette** | European **single-zero** wheel layout (37 pockets, 0–36) using the standard clockwise pocket sequence shared across Monaco / Italy / most EU casinos. |
 
@@ -152,5 +160,7 @@ With AI coding assistance from
 This project is licensed under the **MIT License** —
 see the [LICENSE](./LICENSE) file for full text.
 
-You're free to use, modify, and distribute this code as long as the
-copyright notice is preserved.
+All files in this repository — the JavaScript source, HTML, CSS,
+this README, and any future additions — are released under the MIT
+terms in the [LICENSE](./LICENSE) file. You're free to use, modify,
+and distribute the code as long as the copyright notice is preserved.
