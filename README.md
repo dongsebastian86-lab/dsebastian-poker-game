@@ -97,12 +97,12 @@ This casino suite — including the game logic itself in
 `index.html`, and `style.css` — was developed in collaboration
 with **Buffy**, the AI coding agent behind [Freebuff](https://freebuff.com).
 
-Per the project owner, the build was carried out across several
-days using multiple terminals — Windows **Command Prompt**,
-**PowerShell**, and **WSL/Ubuntu** — with each session rebuilding
-upon the last. The game code was authored by Buffy through iterative
-prompt-driven pair-programming, with the human project owner
-defining direction, reviewing output, and curating the final result.
+The build was carried out across several days using multiple
+terminals — Windows **Command Prompt**, **PowerShell**, and
+**WSL/Ubuntu** — with each session building on the previous
+work. The game code was authored by Buffy through iterative
+prompt-driven pair-programming, while the human project owner
+defined direction, reviewed output, and curated the final result.
 
 The human project owner also:
 
@@ -110,16 +110,13 @@ The human project owner also:
   the repository, and pushed the initial commits)
 - Authored this `README.md` and the `LICENSE` file via collaboration
   with Buffy in the final session
-- Will own the big change currently in planning (see follow-up
-  commits on `main`)
 
 > ℹ️ **About the git commit log.** Commits on `main` are
 > attributed to *"Dong Sebastian"* because that was set as the
-> git identity during the final deployment step. **The commit log
-> is not a reliable indicator of line-level authorship** — it only
-> records who configured `git` when the commit was made. Inspecting
-> the source files directly is a more accurate way to evaluate who
-> actually wrote the code.
+> git identity during the final deployment step. The commit log
+> only records who configured `git` at commit time — there is no
+> reliable way to attribute AI-vs-human contribution after the fact
+> from `git log` alone, so trust this README's attribution instead.
 
 ---
 
