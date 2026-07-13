@@ -92,25 +92,34 @@ poker-game/
 
 ## 🤖 AI-Assisted Development
 
-This repository was deployed to GitHub with the assistance of
-**AI coding tools** via [Freebuff](https://freebuff.com) — specifically
-the **Buffy** coding agent.
+This casino suite — including the game logic itself in
+`casino.js`, `poker.js`, `blackjack.js`, `roulette.js`,
+`index.html`, and `style.css` — was developed in collaboration
+with **Buffy**, the AI coding agent behind [Freebuff](https://freebuff.com).
 
-In this build session, Buffy assisted with:
+Per the project owner, the build was carried out across several
+days using multiple terminals — Windows **Command Prompt**,
+**PowerShell**, and **WSL/Ubuntu** — with each session rebuilding
+upon the last. The game code was authored by Buffy through iterative
+prompt-driven pair-programming, with the human project owner
+defining direction, reviewing output, and curating the final result.
 
-- Reviewing the existing casino codebase and explaining how it works
-- Walking through the `git` / `gh` / GitHub setup
-- Authoring this `README.md` and the `LICENSE` file
-- Crafting the commit messages
+The human project owner also:
 
-The **casino game code itself** — `casino.js`, `poker.js`,
-`blackjack.js`, `roulette.js`, `index.html`, and `style.css` —
-was authored by the human project owner.
+- Ran the final GitHub deployment (set up `git` identity, created
+  the repository, and pushed the initial commits)
+- Authored this `README.md` and the `LICENSE` file via collaboration
+  with Buffy in the final session
+- Will own the big change currently in planning (see follow-up
+  commits on `main`)
 
-> Earlier sessions of this project may have used AI tooling as well;
-> that history is not recorded in this README. The credit above
-> covers only the assisted-versus-human split verifiable from this
-> repository's commit log and conversation history.
+> ℹ️ **About the git commit log.** Commits on `main` are
+> attributed to *"Dong Sebastian"* because that was set as the
+> git identity during the final deployment step. **The commit log
+> is not a reliable indicator of line-level authorship** — it only
+> records who configured `git` when the commit was made. Inspecting
+> the source files directly is a more accurate way to evaluate who
+> actually wrote the code.
 
 ---
 
